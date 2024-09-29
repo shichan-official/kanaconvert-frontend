@@ -1,51 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sum Calculator</title>
-</head>
-<body>
-    <h1>Sum Calculator</h1>
-    
-    <label for="num1">Number 1:</label>
-    <input type="number" id="num1" placeholder="Enter first number" required>
-    
-    <label for="num2">Number 2:</label>
-    <input type="number" id="num2" placeholder="Enter second number" required>
-    
-    <button onclick="calculateSum()">Calculate Sum</button>
-    
-    <h2 id="result"></h2>
+<h1>Kanji to Kana Converter</h1>
 
-    <script>
-        async function calculateSum() {
-            const num1 = parseFloat(document.getElementById('num1').value);
-            const num2 = parseFloat(document.getElementById('num2').value);
+<label for="kanjiText">Kanji Text:</label>
+<input type="text" id="kanjiText" placeholder="Enter Kanji text">
 
-            // API URL hosted on Render (replace with your actual Render URL)
-            const apiURL = 'https://tondabayashi.onrender.com/sum';  // Update with your Render URL
+<button onclick="convertText()">Convert</button>
 
-            try {
-                const response = await fetch(apiURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ num1, num2 })
-                });
+<h2 id="conversionResult"></h2>
 
-                const data = await response.json();
+<script>
+    async function convertText() {
+        const text = document.getElementById('kanjiText').value;
 
-                if (response.ok) {
-                    document.getElementById('result').innerText = `Sum: ${data.sum}`;
-                } else {
-                    document.getElementById('result').innerText = `Error: ${data.message}`;
-                }
-            } catch (error) {
-                document.getElementById('result').innerText = `Error: ${error.message}`;
+        // API URL (replace with your actual Render URL)
+        const apiURL = 'https://tondabayashi.onrender.com/convert';
+
+        try {
+            const response = await fetch(apiURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('conversionResult').innerHTML = `
+                    Hiragana: ${data.hiragana}<br>
+                    Katakana: ${data.katakana}<br>
+                    Romanji: ${data.romanji}
+                `;
+            } else {
+                document.getElementById('conversionResult').innerText = `Error: ${data.message}`;
             }
+        } catch (error) {
+            document.getElementById('conversionResult').innerText = `Error: ${error.message}`;
         }
-    </script>
-</body>
-</html>
+    }
+</script>
