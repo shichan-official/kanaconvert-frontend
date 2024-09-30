@@ -74,50 +74,6 @@
             margin-top: 20px;
         }
 
-        .result-item {
-            background-color: #f9f9f9;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; /* Allows wrapping on smaller screens */
-        }
-
-        .result-label {
-            font-weight: bold;
-            color: #333;
-            width: 150px; /* Fixed width for labels */
-            text-align: left;
-        }
-
-        .result-value {
-            font-size: 16px;
-            color: #555;
-            word-wrap: break-word;
-            flex-grow: 1; /* Allows the value to take remaining space */
-            margin-left: 10px;
-        }
-
-        .copy-button {
-            width: 80px;
-            flex-shrink: 0;
-            margin-left: 10px;
-            padding: 5px 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .copy-button:hover {
-            background-color: #218838;
-        }
-
         .notification {
             position: absolute;
             top: 10px;
@@ -137,66 +93,61 @@
             font-size: 14px;
         }
 
-        /* Mobile Styles */
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 20px;
-            }
-
-            button {
-                width: 100%;
-                padding: 15px;
-                font-size: 18px;
-            }
-
-            input[type="text"] {
-                width: 100%;
-            }
-
-            .container {
-                padding: 15px;
-            }
-
-            .form-group {
-                text-align: center;
-            }
+        .result-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap; /* Allow wrapping */
         }
 
-        /* Extra Small Screens */
-        @media (max-width: 400px) {
-            h1 {
-                font-size: 18px;
-            }
+        .result-label {
+            font-weight: bold;
+            color: #333;
+            width: 150px; /* Fixed width for labels */
+            text-align: left;
+            flex-shrink: 0; /* Prevent label from shrinking */
+        }
 
-            button {
-                padding: 12px;
-                font-size: 16px;
-            }
+        .result-value {
+            font-size: 16px;
+            color: #555;
+            word-wrap: break-word;
+            flex-grow: 1; /* Take remaining space */
+            margin-left: 10px;
+            min-width: 0; /* Prevents the text from overflowing */
+            overflow-wrap: break-word; /* Break long words */
+            white-space: normal; /* Allow wrapping */
+        }
 
+        .copy-button {
+            width: 80px; /* Fixed width for the buttons */
+            flex-shrink: 0; /* Prevents the button from shrinking */
+            margin-left: 10px; /* Space between result-value and button */
+        }
+
+        .copy-button:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 600px) {
             .result-item {
-                flex-direction: column; /* Stack label, value, and button vertically on small screens */
+                flex-direction: column; /* Stack label, value, and button vertically */
                 align-items: flex-start;
             }
 
-            .copy-button {
-                width: 80px; /* Fixed width for the buttons */
-                flex-shrink: 0; /* Prevents the button from shrinking */
-                margin-left: 10px; /* Space between result-value and button */
-            }
-
-            .result-label {
-                font-size: 14px;
-            }
-
             .result-value {
-                font-size: 14px;
-                color: #555;
-                word-wrap: break-word;
-                flex-grow: 1; /* Take remaining space */
-                margin-left: 10px;
-                min-width: 0; /* Prevents the text from overflowing */
-                overflow-wrap: break-word; /* Break long words */
-                white-space: normal; /* Allow wrapping */
+                width: 100%; /* Make the result text take the full width on mobile */
+                margin-left: 0; /* Remove left margin on mobile */
+            }
+
+            .copy-button {
+                margin-top: 5px; /* Space above the button when stacked */
+                width: 100%; /* Full width button on mobile */
             }
         }
     </style>
