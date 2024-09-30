@@ -81,19 +81,23 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between; /* Distribute space between items */
         }
 
         .result-label {
             font-weight: bold;
             color: #333;
+            width: 150px; /* Set a fixed width for the labels */
+            text-align: left; /* Align text to the left */
         }
 
         .result-value {
             font-size: 16px;
             color: #555;
             word-wrap: break-word;
+            flex-grow: 1; /* Allow value to take up remaining space */
+            margin-left: 10px; /* Space between label and value */
         }
 
         .copy-button {
@@ -182,7 +186,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Text Conversion API</h1>
+        <h1>Japanese Text Format Conversion</h1>
         <div class="form-group">
             <label for="inputText">Enter Kanji, Katakana, or Hiragana:</label>
             <input type="text" id="inputText" placeholder="Enter text to convert">
