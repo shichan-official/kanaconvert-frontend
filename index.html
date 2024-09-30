@@ -196,9 +196,19 @@
                 <button class="copy-button" onclick="copyToClipboard('hiraganaResult')">Copy</button>
             </div>
             <div class="result-item">
+                <span class="result-label">Half Width Hiragana:</span>
+                <span class="result-value" id="halfWidthHiraganaResult"></span>
+                <button class="copy-button" onclick="copyToClipboard('halfWidthHiraganaResult')">Copy</button>
+            </div>
+            <div class="result-item">
                 <span class="result-label">Katakana:</span>
                 <span class="result-value" id="katakanaResult"></span>
                 <button class="copy-button" onclick="copyToClipboard('katakanaResult')">Copy</button>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Half Width Katakana:</span>
+                <span class="result-value" id="halfWidthKatakanaResult"></span>
+                <button class="copy-button" onclick="copyToClipboard('halfWidthKatakanaResult')">Copy</button>
             </div>
             <div class="result-item">
                 <span class="result-label">Romanji:</span>
@@ -241,7 +251,9 @@
                 const data = await response.json();
 
                 document.getElementById('hiraganaResult').textContent = data.hiragana;
+                document.getElementById('halfWidthHiraganaResult').textContent = data.halfWidthHiragana;
                 document.getElementById('katakanaResult').textContent = data.katakana;
+                document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
                 document.getElementById('romanjiResult').textContent = data.romanji;
 
                 document.getElementById('results').style.display = 'block';
