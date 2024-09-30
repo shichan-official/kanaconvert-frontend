@@ -137,17 +137,26 @@
         @media (max-width: 600px) {
             .result-item {
                 flex-direction: column; /* Stack label, value, and button vertically */
-                align-items: flex-start;
+                align-items: center; /* Center align all items */
+                text-align: center; /* Center text in label and result value */
+            }
+
+            .result-label {
+                width: auto; /* Auto width for label */
+                text-align: center; /* Center the label */
+                margin-bottom: 5px; /* Space between label and result text */
             }
 
             .result-value {
-                width: 90%; /* Make the result text take the full width on mobile */
-                margin-left: 0; /* Remove left margin on mobile */
+                width: 100%; /* Full width for result value */
+                margin-left: 0; /* Remove left margin */
+                text-align: center; /* Center the result text */
             }
 
             .copy-button {
-                margin-top: 5px; /* Space above the button when stacked */
-                width: 90%; /* Full width button on mobile */
+                margin-top: 5px; /* Space between result value and button */
+                width: auto; /* Allow button width to adjust */
+                text-align: center; /* Center the button */
             }
         }
     </style>
