@@ -82,25 +82,28 @@
             border-radius: 4px;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Distribute space between items */
+            justify-content: space-between;
+            flex-wrap: wrap; /* Allows wrapping on smaller screens */
         }
 
         .result-label {
             font-weight: bold;
             color: #333;
-            width: 150px; /* Set a fixed width for the labels */
-            text-align: left; /* Align text to the left */
+            width: 150px; /* Fixed width for labels */
+            text-align: left;
         }
 
         .result-value {
             font-size: 16px;
             color: #555;
             word-wrap: break-word;
-            flex-grow: 1; /* Allow value to take up remaining space */
-            margin-left: 10px; /* Space between label and value */
+            flex-grow: 1; /* Allows the value to take remaining space */
+            margin-left: 10px;
         }
 
         .copy-button {
+            width: 80px;
+            flex-shrink: 0;
             margin-left: 10px;
             padding: 5px 10px;
             background-color: #28a745;
@@ -171,7 +174,13 @@
             }
 
             .result-item {
-                padding: 8px;
+                flex-direction: column; /* Stack label, value, and button vertically on small screens */
+                align-items: flex-start;
+            }
+
+            .copy-button {
+                margin-top: 5px; /* Adds space above the button when stacked */
+                width: 100%; /* Full width on mobile */
             }
 
             .result-label {
