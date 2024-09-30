@@ -79,6 +79,9 @@
             margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .result-label {
@@ -90,6 +93,21 @@
             font-size: 16px;
             color: #555;
             word-wrap: break-word;
+        }
+
+        .copy-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .copy-button:hover {
+            background-color: #218838;
         }
 
         footer {
@@ -161,14 +179,17 @@
             <div class="result-item">
                 <span class="result-label">Hiragana:</span>
                 <span class="result-value" id="hiraganaResult"></span>
+                <button class="copy-button" onclick="copyToClipboard('hiraganaResult')">Copy</button>
             </div>
             <div class="result-item">
                 <span class="result-label">Katakana:</span>
                 <span class="result-value" id="katakanaResult"></span>
+                <button class="copy-button" onclick="copyToClipboard('katakanaResult')">Copy</button>
             </div>
             <div class="result-item">
                 <span class="result-label">Romanji:</span>
                 <span class="result-value" id="romanjiResult"></span>
+                <button class="copy-button" onclick="copyToClipboard('romanjiResult')">Copy</button>
             </div>
         </div>
 
@@ -211,6 +232,15 @@
             } catch (error) {
                 alert('Error: ' + error.message);
             }
+        }
+
+        function copyToClipboard(resultId) {
+            const resultText = document.getElementById(resultId).textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert("Copied to clipboard: " + resultText);
+            }).catch(err => {
+                console.error("Error copying text: ", err);
+            });
         }
     </script>
 </body>
