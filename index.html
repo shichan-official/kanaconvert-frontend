@@ -159,23 +159,43 @@
                 text-align: center; /* Center the button */
             }
 
-            .loading {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-size: 18px;
-                color: #007BFF;
-                margin-top: 20px;
-                font-weight: bold;
-            }
+            .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #007BFF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         }
     </style>
 </head>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
 <body>
     <div class="container">
-        <div class="loading" id="loadingIndicator" style="display: none;">
-            <span>Loading...</span>
-        </div>
         <h1>Kana Conversion</h1>
         <div class="form-group">
             <label for="inputText">Enter Kanji, Katakana, or Hiragana:</label>
@@ -228,8 +248,10 @@
                 return;
             }
 
-            // Show loading indicator
-            document.getElementById('loadingIndicator').style.display = 'block';
+            // Show overlay and disable button
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            const convertButton = document.querySelector('button');
+            convertButton.disabled = true;
 
             const apiURL = 'https://tondabayashi.onrender.com/convert';
 
@@ -248,7 +270,6 @@
 
                 const data = await response.json();
 
-                // Update results
                 document.getElementById('hiraganaResult').textContent = data.hiragana;
                 document.getElementById('katakanaResult').textContent = data.katakana;
                 document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
@@ -258,8 +279,9 @@
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {
-                // Hide loading indicator when the response is done
-                document.getElementById('loadingIndicator').style.display = 'none';
+                // Hide overlay and enable button
+                document.getElementById('loadingOverlay').style.display = 'none';
+                convertButton.disabled = false;
             }
         }
 
