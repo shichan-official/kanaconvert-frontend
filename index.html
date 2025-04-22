@@ -158,11 +158,24 @@
                 width: auto; /* Allow button width to adjust */
                 text-align: center; /* Center the button */
             }
+
+            .loading {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 18px;
+                color: #007BFF;
+                margin-top: 20px;
+                font-weight: bold;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="loading" id="loadingIndicator" style="display: none;">
+            <span>Loading...</span>
+        </div>
         <h1>Kana Conversion</h1>
         <div class="form-group">
             <label for="inputText">Enter Kanji, Katakana, or Hiragana:</label>
@@ -201,6 +214,12 @@
     </div>
 
     <script>
+        window.onload = function() {
+            fetch('https://tondabayashi.onrender.com/ping')
+                .then(response => response.json())
+                .then(data => console.log(data.status)) // Logs "alive" if successful
+                .catch(error => console.error('Error pinging the server:', error));
+        };
         async function performConversion() {
             const text = document.getElementById('inputText').value;
 
@@ -208,6 +227,9 @@
                 alert('Please enter text to convert.');
                 return;
             }
+
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
 
             const apiURL = 'https://tondabayashi.onrender.com/convert';
 
@@ -226,6 +248,7 @@
 
                 const data = await response.json();
 
+                // Update results
                 document.getElementById('hiraganaResult').textContent = data.hiragana;
                 document.getElementById('katakanaResult').textContent = data.katakana;
                 document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
@@ -234,6 +257,9 @@
                 document.getElementById('results').style.display = 'block';
             } catch (error) {
                 alert('Error: ' + error.message);
+            } finally {
+                // Hide loading indicator when the response is done
+                document.getElementById('loadingIndicator').style.display = 'none';
             }
         }
 
