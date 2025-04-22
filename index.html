@@ -14,8 +14,9 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            position: relative;
         }
-
+    
         .container {
             background-color: #fff;
             border-radius: 8px;
@@ -26,26 +27,27 @@
             text-align: center;
             margin: 10px;
             position: relative;
+            z-index: 1;
         }
-
+    
         h1 {
             color: #333;
             font-size: 24px;
             margin-bottom: 20px;
         }
-
+    
         .form-group {
             margin-bottom: 15px;
             text-align: left;
         }
-
+    
         label {
             font-weight: bold;
             margin-bottom: 5px;
             display: block;
             color: #555;
         }
-
+    
         input[type="text"] {
             width: calc(100% - 20px);
             padding: 10px;
@@ -54,7 +56,7 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-
+    
         button {
             background-color: #007BFF;
             color: white;
@@ -65,15 +67,15 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
+    
         button:hover {
             background-color: #0056b3;
         }
-
+    
         .results {
             margin-top: 20px;
         }
-
+    
         .notification {
             position: absolute;
             top: 10px;
@@ -86,13 +88,13 @@
             transition: opacity 0.5s ease;
             z-index: 10;
         }
-
+    
         footer {
             margin-top: 20px;
             color: #777;
             font-size: 14px;
         }
-
+    
         .result-item {
             background-color: #f9f9f9;
             padding: 10px;
@@ -102,77 +104,78 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap; /* Allow wrapping */
+            flex-wrap: wrap;
         }
-
+    
         .result-label {
             font-weight: bold;
             color: #333;
-            width: 150px; /* Fixed width for labels */
+            width: 150px;
             text-align: left;
-            flex-shrink: 0; /* Prevent label from shrinking */
+            flex-shrink: 0;
         }
-
+    
         .result-value {
             font-size: 16px;
             color: #555;
             word-wrap: break-word;
-            flex-grow: 1; /* Take remaining space */
+            flex-grow: 1;
             margin-left: 10px;
-            min-width: 0; /* Prevents the text from overflowing */
-            overflow-wrap: break-word; /* Break long words */
-            white-space: normal; /* Allow wrapping */
+            min-width: 0;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
-
+    
         .copy-button {
-            width: 80px; /* Fixed width for the buttons */
-            flex-shrink: 0; /* Prevents the button from shrinking */
-            margin-left: 10px; /* Space between result-value and button */
+            width: 80px;
+            flex-shrink: 0;
+            margin-left: 10px;
         }
-
+    
         .copy-button:hover {
             background-color: #218838;
         }
-
+    
         @media (max-width: 600px) {
             .result-item {
-                flex-direction: column; /* Stack label, value, and button vertically */
-                align-items: center; /* Center align all items */
-                text-align: center; /* Center text in label and result value */
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
-
+    
             .result-label {
-                width: auto; /* Auto width for label */
-                text-align: center; /* Center the label */
-                margin-bottom: 5px; /* Space between label and result text */
+                width: auto;
+                text-align: center;
+                margin-bottom: 5px;
             }
-
+    
             .result-value {
-                width: 100%; /* Full width for result value */
-                margin-left: 0; /* Remove left margin */
-                text-align: center; /* Center the result text */
+                width: 100%;
+                margin-left: 0;
+                text-align: center;
             }
-
+    
             .copy-button {
-                margin-top: 5px; /* Space between result value and button */
-                width: auto; /* Allow button width to adjust */
-                text-align: center; /* Center the button */
+                margin-top: 5px;
+                width: auto;
+                text-align: center;
             }
-
-            .loading-overlay {
+        }
+    
+        .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(255, 255, 255, 0.8);
-            z-index: 999;
+            z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
-
+    
         .spinner {
             border: 6px solid #f3f3f3;
             border-top: 6px solid #007BFF;
@@ -182,18 +185,13 @@
             animation: spin 1s linear infinite;
             margin-bottom: 15px;
         }
-
+    
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        }
     </style>
 </head>
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
-    <p>Loading...</p>
-</div>
 <body>
     <div class="container">
         <h1>Kana Conversion</h1>
@@ -307,5 +305,9 @@
             }, 1500); // Display for 1.5 seconds
         }
     </script>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
 </body>
 </html>
