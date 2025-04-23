@@ -315,7 +315,8 @@
             }
 
             const data = await response.json();
-            typeWriterEffect(data.message, document.getElementById("llmGreeting"), 40); // 40ms per letter
+            const cleanMessage = data.message.replace(/^"(.*)"$/, '$1'); // Removes quotes if they wrap the string
+            typeWriterEffect(cleanMessage, document.getElementById("llmGreeting"), 40); // 40ms per letter
         }
 
         function typeWriterEffect(text, element, delay = 50) {
