@@ -234,10 +234,6 @@
 
     <script>
         window.onload = function() {
-            fetch('https://tondabayashi.onrender.com/ping')
-                .then(response => response.json())
-                .then(data => console.log(data.status)) // Logs "alive" if successful
-                .catch(error => console.error('Error pinging the server:', error));
             fetchGreeting();
         };
         async function performConversion() {
