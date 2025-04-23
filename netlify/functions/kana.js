@@ -6,24 +6,29 @@ export async function handler(event, context) {
     const inputText = body.text || "";
   
     const prompt = `
-  You are a text converter for a Kana conversion website. Given any input text, return a JSON object with four keys:
-  
-  - "hiragana": the input fully converted to Hiragana (including any Kanji)
-  - "katakana": the same as above, but in full-width Katakana
-  - "halfWidthKatakana": same as Katakana but in **half-width Katakana characters**
-  - "romanji": the input transliterated to Roman letters (Romaji)
-  
-  Do not modify or decorate the input in any way.
-  Convert all Kanji into Hiragana/Katakana. Do not leave any Kanji characters in the output.
-  Do not include explanations, descriptions, or code blocks. Just return the raw JSON object.
-  If a conversion is not possible for a field, return original string.
-  If input is English only (or contains English), do your best to transliterate for each case.
-  For example if input is "Test", I expect {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
-  For example if input is "漢字ですTEST", I expect {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"KANJI DESU TEST"}
-  Do not add symbols like 〜, ・, or punctuation unless they were in the original input.
-  
-  Input: "${inputText}"
-  `;
+    You are a text converter for a Kana conversion website. Given any input text, return a JSON object with four keys:
+
+    - "hiragana": the input fully converted to Hiragana (including any Kanji)
+    - "katakana": the same as above, but in full-width Katakana
+    - "halfWidthKatakana": same as Katakana but using half-width Katakana characters
+    - "romanji": the input transliterated to Roman letters (Romaji)
+
+    Rules:
+    - You must apply conversion rules to the **entire** input string. Do not skip, omit, or mix formats (e.g. kana + romaji).
+    - Do not leave any Kanji characters in the output — convert them fully to Hiragana or Katakana.
+    - Do not add or modify punctuation, symbols, or characters. Only use what's in the original input.
+    - If conversion is not possible for a field, return the original string in that field.
+    - If the input includes English, transliterate it phonetically where possible.
+
+    Output must be:
+    - A raw compact JSON object only (no code blocks, no comments, no formatting)
+    - For example:
+    - "Test" → {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
+    - "漢字ですTEST" → {"hiragana":"かんじですてすと","katakana":"カンジデステスト","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽﾃｽﾄ","romanji":"KANJI DESU TEST"}
+    - "TESTTESTTEST" → {"hiragana":"てすとてすとてすと","katakana":"テストテストテスト","halfWidthKatakana":"ﾃｽﾄﾃｽﾄﾃｽﾄ","romanji":"TESTTESTTEST"}
+
+    Input: "${inputText}"
+    `;
   
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
