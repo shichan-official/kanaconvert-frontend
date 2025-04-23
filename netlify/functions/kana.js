@@ -6,41 +6,34 @@ export async function handler(event, context) {
     const inputText = body.text || "";
   
     const prompt = `
-    You are a text converter for a Kana conversion website. Given any input text, return a JSON object with four keys:
+    You are a Japanese text converter for a Kana conversion website. Given any input, return a JSON object with four keys:
 
-    - "hiragana": the input fully converted to Hiragana (including any Kanji)
-    - "katakana": same as above, but in full-width Katakana
-    - "halfWidthKatakana": same as Katakana, but using **half-width Katakana characters**
-    - "romanji": the input transliterated to Roman letters (Romaji)
+    - "hiragana": the entire input converted to Hiragana (convert all Kanji and Katakana)
+    - "katakana": the same as above, but converted to full-width Katakana
+    - "halfWidthKatakana": same as "katakana" but converted to **half-width Katakana characters**
+    - "romanji": the input transliterated to Romaji
 
-    Rules:
+    Strict rules:
+    - Absolutely no Kanji characters are allowed in any of the fields — fully convert them. Convert everything, including polite expressions like お願いします, into full kana.
+    - In "halfWidthKatakana", all Katakana (including those with dakuten like グ or ゾ, or handakuten like パ) **must be correctly converted to their half-width forms** like  ｸﾞ, ｿﾞ, ﾊﾟ.
+    - There is a one-to-one mapping from katakana to halfWidthKatakana, so they must look nearly identical and have the same number of characters.
+    - Do not guess or use approximate characters. Use correct phonetic mappings only.
+    - Alphabetical characters (A-Z, a-z) should be returned as-is in all fields.
+    - Do not return extra symbols like 〜 or ・ unless they were in the original input.
+    - Return only raw valid compact JSON. No markdown, no code block, no explanation.
 
-    - Do not leave any Kanji characters in the output — convert them into Hiragana or Katakana.
-    - Apply conversion rules to the entire input consistently. Do not skip, ignore, or mix styles.
-    - If the input contains Latin (alphabet) letters, leave them unchanged across all fields.
-    - Do not add or remove punctuation, symbols, or characters unless they are part of the input.
-    - For \`halfWidthKatakana\`, use strict character-for-character conversion from full-width Katakana using Unicode half-width equivalents (range FF61–FF9F).
+    Examples:
+    Input: "Test"
+    Output: {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
 
-    Dakuten/Handakuten Rules:
+    Input: "漢字ですTEST"
+    Output: {"hiragana":"かんじですTEST","katakana":"カンジデステスト","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽﾃｽﾄ","romanji":"kanji desu TEST"}
 
-    - カ → ｶ, ガ → ｶﾞ, キ → ｷ, ギ → ｷﾞ, ク → ｸ, グ → ｸﾞ, ケ → ｹ, ゲ → ｹﾞ, コ → ｺ, ゴ → ｺﾞ
-    - サ → ｻ, ザ → ｻﾞ, シ → ｼ, ジ → ｼﾞ, ス → ｽ, ズ → ｽﾞ, セ → ｾ, ゼ → ｾﾞ, ソ → ｿ, ゾ → ｿﾞ
-    - タ → ﾀ, ダ → ﾀﾞ, チ → ﾁ, ヂ → ﾁﾞ, ツ → ﾂ, ヅ → ﾂﾞ, テ → ﾃ, デ → ﾃﾞ, ト → ﾄ, ド → ﾄﾞ
-    - ナ → ﾅ, ニ → ﾆ, ヌ → ﾇ, ネ → ﾈ, ノ → ﾉ
-    - ハ → ﾊ, バ → ﾊﾞ, パ → ﾊﾟ, ヒ → ﾋ, ビ → ﾋﾞ, ピ → ﾋﾟ, フ → ﾌ, ブ → ﾌﾞ, プ → ﾌﾟ, ヘ → ﾍ, ベ → ﾍﾞ, ペ → ﾍﾟ, ホ → ﾎ, ボ → ﾎﾞ, ポ → ﾎﾟ
-    - マ → ﾏ, ミ → ﾐ, ム → ﾑ, メ → ﾒ, モ → ﾓ
-    - ヤ → ﾔ, ユ → ﾕ, ヨ → ﾖ
-    - ラ → ﾗ, リ → ﾘ, ル → ﾙ, レ → ﾚ, ロ → ﾛ
-    - ワ → ﾜ, ヲ → ｦ, ン → ﾝ
+    Input: "元気ですか？今木場駅なの？This is a test"
+    Output: {"hiragana":"げんきですか？いまきばえきなの？This is a test","katakana":"ゲンキデスカ？イマキバエキナノ？This is a test","halfWidthKatakana":"ｹﾞﾝｷﾃﾞｽｶ?ｲﾏｷﾊﾞｴｷﾅﾉ?This is a test","romanji":"genki desu ka? ima kiba eki nano? This is a test"}
 
-    Special Cases:
-
-    - For long vowels:
-        - ァ → ｧ, ア → ｱ, ィ → ｨ, イ → ｨ, ゥ → ｩ, ウ → ｩ, ェ → ｪ, エ → ｴ, ォ → ｩ, オ → ｵ
-        - カ → ｶ, キ → ｷ, ク → ｸ, ケ → ｹ, コ → ｺ (for vowel extensions)
-    - For half-width Katakana, follow the mapping exactly as Unicode defines it.
-
-    Do not include explanations, descriptions, or code blocks. Just return the raw JSON object.
+    Input: "清香です"
+    Output: {"hiragana":"さやかです","katakana":"サヤカです","halfWidthKatakana":"ｻﾔｶです","romanji":"Sayaka desu"}
 
     Input: "${inputText}"
     `;
