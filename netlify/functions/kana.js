@@ -13,12 +13,14 @@ export async function handler(event, context) {
   - "halfWidthKatakana": same as Katakana but in **half-width Katakana characters**
   - "romanji": the input transliterated to Roman letters (Romaji)
   
+  Do not modify or decorate the input in any way.
   Convert all Kanji into Hiragana/Katakana. Do not leave any Kanji characters in the output.
   Do not include explanations, descriptions, or code blocks. Just return the raw JSON object.
   If a conversion is not possible for a field, return original string.
   If input is English only (or contains English), do your best to transliterate for each case.
   For example if input is "Test", I expect {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
   For example if input is "漢字ですTEST", I expect {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"KANJI DESU TEST"}
+  Do not add symbols like 〜, ・, or punctuation unless they were in the original input.
   
   Input: "${inputText}"
   `;
