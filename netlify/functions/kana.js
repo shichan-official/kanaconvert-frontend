@@ -45,7 +45,7 @@ export async function handler(event, context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "shisa-ai/shisa-v2-llama3.3-70b:free",
+          model: "microsoft/mai-ds-r1:free",
           messages: [{ role: "user", content: prompt }]
         })
       });
