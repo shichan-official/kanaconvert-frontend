@@ -14,8 +14,9 @@ export async function handler(event, context) {
     - "romanji": the input transliterated to Romaji
 
     Strict rules:
-    - Absolutely no Kanji characters are allowed in any of the fields — fully convert them.
+    - Absolutely no Kanji characters are allowed in any of the fields — fully convert them. Convert everything, including polite expressions like お願いします, into full kana.
     - In "halfWidthKatakana", all Katakana (including those with dakuten like グ or ゾ, or handakuten like パ) **must be correctly converted to their half-width forms** like  ｸﾞ, ｿﾞ, ﾊﾟ.
+    - There is a one-to-one mapping from katakana to halfWidthKatakana, so they must look nearly identical and have the same number of characters.
     - Do not guess or use approximate characters. Use correct phonetic mappings only.
     - Alphabetical characters (A-Z, a-z) should be returned as-is in all fields.
     - Do not return extra symbols like 〜 or ・ unless they were in the original input.
