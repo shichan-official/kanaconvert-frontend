@@ -31,6 +31,8 @@ export async function handler(event, context) {
         messages: [{ role: "user", content: prompt }]
       })
     });
+
+    console.log("Response from Kana conversion API: ", response);
   
     if (!response.ok) {
       return {
