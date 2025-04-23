@@ -6,29 +6,27 @@ export async function handler(event, context) {
     const inputText = body.text || "";
   
     const prompt = `
-    You are a text converter for a Kana conversion website. Given any input text, return a JSON object with four keys:
+    You are a Kana converter for a Japanese language tool. Given any input string, return a JSON object with 4 keys:
 
-    - "hiragana": the input fully converted to Hiragana (convert all Kanji and Katakana, but leave English letters unchanged)
-    - "katakana": same as above, but convert to full-width Katakana
-    - "halfWidthKatakana": same as Katakana but using half-width Katakana characters
-    - "romanji": the input transliterated to Roman letters (Romaji), but leave original alphabet characters unchanged
+    - "hiragana": full conversion of all Kanji and Katakana to Hiragana (alphabet characters and punctuation must be preserved as-is)
+    - "katakana": full conversion of all Kanji and Hiragana to full-width Katakana (alphabet characters and punctuation must be preserved as-is)
+    - "halfWidthKatakana": identical to katakana, but all Katakana characters must be in **half-width format**
+    - "romanji": Romaji transliteration of the converted text (preserving all alphabet input as-is)
 
-    Rules:
-    - Leave English alphabet characters (A-Z, a-z) exactly as they are in **all** fields.
-    - Do not modify, replace, or transliterate alphabet characters.
-    - Convert all Kanji and Kana fully.
-    - Do not skip, omit, or mix formats.
-    - Do not add or modify punctuation, symbols, or characters. Preserve them as-is from input.
-    - If conversion is not possible for a field, return the original input.
-
-    Output must be:
-    - A raw compact JSON object only (no formatting, no explanations, no code blocks)
+    Strict rules:
+    - All Kanji must be converted to Hiragana/Katakana (do not leave any Kanji in output)
+    - Katakana must be converted to Hiragana for "hiragana" field, and vice versa
+    - English letters and punctuation (e.g., TEST, !) must not be changed in any field
+    - Preserve **input order** exactly — do not drop, reorder, or duplicate characters
+    - Half-width Katakana must be an accurate visual transformation of Katakana (e.g., カンジ → ｶﾝｼﾞ)
+    - Never include 〜 or ・ unless in original input
+    - Output must be compact raw JSON (no code blocks, no extra text)
 
     Examples:
-    - "Test" → {"hiragana":"Test","katakana":"Test","halfWidthKatakana":"Test","romanji":"Test"}
-    - "漢字です" → {"hiragana":"かんじです","katakana":"カンジデス","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽ","romanji":"kanji desu"}
-    - "漢字ですTEST" → {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"kanji desu TEST"}
-    - "ABC" → {"hiragana":"ABC","katakana":"ABC","halfWidthKatakana":"ABC","romanji":"ABC"}
+    - Input: "Test" → {"hiragana":"Test","katakana":"Test","halfWidthKatakana":"Test","romanji":"Test"}
+    - Input: "漢字ですTEST" → {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"kanji desu TEST"}
+    - Input: "カタカナ" → {"hiragana":"かたかな","katakana":"カタカナ","halfWidthKatakana":"ｶﾀｶﾅ","romanji":"katakana"}
+    - Input: "TESTあいうえおアイウエオ銀座駅" → {"hiragana":"TESTあいうえおあいうえおぎんざえき","katakana":"TESTアイウエオアイウエオギンザエキ","halfWidthKatakana":"TESTｱｲｳｴｵｱｲｳｴｵｷﾞﾝｻﾞｴｷ","romanji":"TEST a i u e o ai u e o ginza eki"}
 
     Input: "${inputText}"
     `;
