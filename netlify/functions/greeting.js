@@ -11,9 +11,10 @@ export async function handler(event, context) {
       },
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct",
-        messages: [
-          { role: "user", content: "Say a friendly greeting in Japanese with English translation." }
-        ]
+        messages: [{
+            role: "user",
+            content: "Respond with only a short, casual, friendly one-sentence greeting (in English) for a kana conversion website. Do not include explanations or translations."
+        }]
       })
     });
   

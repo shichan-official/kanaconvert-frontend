@@ -315,7 +315,20 @@
             }
 
             const data = await response.json();
-            document.getElementById("llmGreeting").textContent = data.message;
+            typeWriterEffect(data.message, document.getElementById("llmGreeting"), 40); // 40ms per letter
+        }
+
+        function typeWriterEffect(text, element, delay = 50) {
+            element.textContent = ''; // Clear any previous text
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, delay);
+                }
+            }
+            type();
         }
     </script>
     <div id="loadingOverlay" class="loading-overlay">
