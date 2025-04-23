@@ -27,7 +27,7 @@ export async function handler(event, context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct",
+        model: "microsoft/mai-ds-r1:free",
         messages: [{ role: "user", content: prompt }]
       })
     });
