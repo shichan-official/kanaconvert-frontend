@@ -195,6 +195,7 @@
 <body>
     <div class="container">
         <h1>Kana Conversion</h1>
+        <div id="llmGreeting" style="margin-bottom: 20px; font-weight: bold;"></div>
         <div class="form-group">
             <label for="inputText">Enter Kanji, Katakana, or Hiragana:</label>
             <input type="text" id="inputText" placeholder="Enter text to convert">
@@ -233,6 +234,7 @@
 
     <script>
         window.onload = function() {
+            fetchGreeting();
             fetch('https://tondabayashi.onrender.com/ping')
                 .then(response => response.json())
                 .then(data => console.log(data.status)) // Logs "alive" if successful
@@ -303,6 +305,17 @@
                     notification.style.display = 'none';
                 }, 500); // Hide after fade-out
             }, 1500); // Display for 1.5 seconds
+        }
+        async function fetchGreeting() {
+            const response = await fetch("/.netlify/functions/greeting");
+
+            if (!response.ok) {
+                console.error("Failed to get greeting:", response.statusText);
+                return;
+            }
+
+            const data = await response.json();
+            document.getElementById("llmGreeting").textContent = data.message;
         }
     </script>
     <div id="loadingOverlay" class="loading-overlay">
