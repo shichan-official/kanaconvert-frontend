@@ -50,6 +50,7 @@ export async function handler(event, context) {
       }
   
       let content = data.choices[0].message.content.trim();
+      content = content.replace(/```(?:json)?\s*([\s\S]*?)\s*```/, "$1").trim();
   
       try {
         const parsed = JSON.parse(content);
