@@ -20,6 +20,7 @@ export async function handler(event, context) {
     - Alphabetical characters (A-Z, a-z) should be returned as-is in all fields.
     - Do not return extra symbols like 〜 or ・ unless they were in the original input.
     - Return only raw valid compact JSON. No markdown, no code block, no explanation.
+    - Always convert 清香 as "さやか" (Sayaka). Do not use other readings.
 
     Examples:
     Input: "Test"
@@ -30,6 +31,9 @@ export async function handler(event, context) {
 
     Input: "元気ですか？今木場駅なの？This is a test"
     Output: {"hiragana":"げんきですか？いまきばえきなの？This is a test","katakana":"ゲンキデスカ？イマキバエキナノ？This is a test","halfWidthKatakana":"ｹﾞﾝｷﾃﾞｽｶ?ｲﾏｷﾊﾞｴｷﾅﾉ?This is a test","romanji":"genki desu ka? ima kiba eki nano? This is a test"}
+
+    Input: "清香です"
+    Output: {"hiragana":"さやかです","katakana":"サヤカです","halfWidthKatakana":"ｻﾔｶです","romanji":"Sayaka desu"}
 
     Input: "${inputText}"
     `;
