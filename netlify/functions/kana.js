@@ -10,12 +10,12 @@ export async function handler(event, context) {
   
   - "hiragana": the input converted to Hiragana (if applicable, or empty string otherwise)
   - "katakana": the input converted to full-width Katakana (if applicable, or empty string otherwise)
-  - "halfWidthKatakana": the input converted to **half-width** Katakana (use half-width Katakana characters)
+  - "halfWidthKatakana": the input converted to **half-width** Katakana (use half-width Katakana characters, this should be almost identical to katakana field but must be in half-width format)
   - "romanji": the input transliterated to Roman letters (Romaji)
   
   Always respond ONLY with a valid, compact JSON object. If conversion is not possible for a field, return an empty string for that field. Do not include any explanation.
   If input is English only (or contains English), do your best to transliterate for each case.
-  For example if input is "Test", I expect {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｯﾄ","romanji":"tesuto"}
+  For example if input is "Test", I expect {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"tesuto"}
   
   Input: "${inputText}"
   `;
