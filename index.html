@@ -253,19 +253,17 @@
             const convertButton = document.querySelector('button');
             convertButton.disabled = true;
 
-            const apiURL = 'https://tondabayashi.onrender.com/convert';
-
             try {
-                const response = await fetch(apiURL, {
+                const response = await fetch('/.netlify/functions/kana', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ text: text }),
+                    body: JSON.stringify({ text })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch');
+                    throw new Error('Failed to get conversion results');
                 }
 
                 const data = await response.json();
@@ -306,6 +304,7 @@
                 }, 500); // Hide after fade-out
             }, 1500); // Display for 1.5 seconds
         }
+
         async function fetchGreeting() {
             const response = await fetch("/.netlify/functions/greeting");
 
