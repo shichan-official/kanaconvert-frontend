@@ -8,28 +8,30 @@ export async function handler(event, context) {
     const prompt = `
     You are a text converter for a Kana conversion website. Given any input text, return a JSON object with four keys:
 
-    - "hiragana": the input fully converted to Hiragana (including any Kanji)
-    - "katakana": the same as above, but in full-width Katakana
+    - "hiragana": the input fully converted to Hiragana (convert all Kanji and Katakana, but leave English letters unchanged)
+    - "katakana": same as above, but convert to full-width Katakana
     - "halfWidthKatakana": same as Katakana but using half-width Katakana characters
-    - "romanji": the input transliterated to Roman letters (Romaji)
+    - "romanji": the input transliterated to Roman letters (Romaji), but leave original alphabet characters unchanged
 
     Rules:
-    - You must apply conversion rules to the **entire** input string. Do not skip, omit, or mix formats (e.g. kana + romaji).
-    - Do not leave any Kanji characters in the output — convert them fully to Hiragana or Katakana.
-    - Do not add or modify punctuation, symbols, or characters. Only use what's in the original input.
-    - If conversion is not possible for a field, return the original string in that field.
-    - If the input includes English, transliterate it phonetically where possible.
+    - Leave English alphabet characters (A-Z, a-z) exactly as they are in **all** fields.
+    - Do not modify, replace, or transliterate alphabet characters.
+    - Convert all Kanji and Kana fully.
+    - Do not skip, omit, or mix formats.
+    - Do not add or modify punctuation, symbols, or characters. Preserve them as-is from input.
+    - If conversion is not possible for a field, return the original input.
 
     Output must be:
-    - A raw compact JSON object only (no code blocks, no comments, no formatting)
-    - For example:
-    - "Test" → {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
-    - "漢字ですTEST" → {"hiragana":"かんじですてすと","katakana":"カンジデステスト","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽﾃｽﾄ","romanji":"KANJI DESU TEST"}
-    - "TESTTESTTEST" → {"hiragana":"てすとてすとてすと","katakana":"テストテストテスト","halfWidthKatakana":"ﾃｽﾄﾃｽﾄﾃｽﾄ","romanji":"TESTTESTTEST"}
+    - A raw compact JSON object only (no formatting, no explanations, no code blocks)
+
+    Examples:
+    - "Test" → {"hiragana":"Test","katakana":"Test","halfWidthKatakana":"Test","romanji":"Test"}
+    - "漢字です" → {"hiragana":"かんじです","katakana":"カンジデス","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽ","romanji":"kanji desu"}
+    - "漢字ですTEST" → {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"kanji desu TEST"}
+    - "ABC" → {"hiragana":"ABC","katakana":"ABC","halfWidthKatakana":"ABC","romanji":"ABC"}
 
     Input: "${inputText}"
     `;
-  
     try {
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
