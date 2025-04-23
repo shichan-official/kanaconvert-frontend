@@ -13,7 +13,7 @@ export async function handler(event, context) {
         model: "mistralai/mistral-7b-instruct",
         messages: [{
             role: "user",
-            content: "Respond with only a short, casual, friendly one-sentence greeting (in English) for a kana conversion website. Do not include explanations or translations."
+            content: "Respond with only a short, casual, friendly one-sentence greeting (in English) for a kana conversion website (not a learning website). Do not include explanations or translations. Try to make it somewhat funny."
         }]
       })
     });
