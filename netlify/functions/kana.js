@@ -10,7 +10,7 @@ export async function handler(event, context) {
 
     - "hiragana": full conversion of all Kanji and Katakana to Hiragana (alphabet characters and punctuation must be preserved as-is)
     - "katakana": full conversion of all Kanji and Hiragana to full-width Katakana (alphabet characters and punctuation must be preserved as-is)
-    - "halfWidthKatakana": identical to katakana, but all Katakana characters must be in **half-width format**
+    - "halfWidthKatakana": identical to Katakana, but all Katakana characters **must** be converted to **half-width** format (ensure correct transformation from full-width to half-width Katakana characters, e.g., カ → ｶ)
     - "romanji": Romaji transliteration of the converted text (preserving all alphabet input as-is)
 
     Strict rules:
@@ -18,7 +18,7 @@ export async function handler(event, context) {
     - Katakana must be converted to Hiragana for "hiragana" field, and vice versa
     - English letters and punctuation (e.g., TEST, !) must not be changed in any field
     - Preserve **input order** exactly — do not drop, reorder, or duplicate characters
-    - Half-width Katakana must be an accurate visual transformation of Katakana (e.g., カンジ → ｶﾝｼﾞ)
+    - Half-width Katakana must be an accurate visual transformation of Katakana (e.g., カンジ → ｶﾝｼﾞ, not ｸﾞ)
     - Never include 〜 or ・ unless in original input
     - Output must be compact raw JSON (no code blocks, no extra text)
 
@@ -26,7 +26,8 @@ export async function handler(event, context) {
     - Input: "Test" → {"hiragana":"Test","katakana":"Test","halfWidthKatakana":"Test","romanji":"Test"}
     - Input: "漢字ですTEST" → {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"kanji desu TEST"}
     - Input: "カタカナ" → {"hiragana":"かたかな","katakana":"カタカナ","halfWidthKatakana":"ｶﾀｶﾅ","romanji":"katakana"}
-    - Input: "TESTあいうえおアイウエオ銀座駅" → {"hiragana":"TESTあいうえおあいうえおぎんざえき","katakana":"TESTアイウエオアイウエオギンザエキ","halfWidthKatakana":"TESTｱｲｳｴｵｱｲｳｴｵｷﾞﾝｻﾞｴｷ","romanji":"TEST a i u e o ai u e o ginza eki"}
+    - Input: "TESTあいうえおアイウエオ銀座駅" → {"hiragana":"TESTあいうえおあいうえおぎんざえき","katakana":"TESTアイウエオアイウエオギンザエキ","halfWidthKatakana":"TESTｱｲｳｴｵｱｲｳｴｵｷﾞﾝｻﾞｴｷ","romanji":"TEST a i u e o a i u e o ginza eki"}
+    - Input: "元気ですか？" → {"hiragana":"げんきですか？","katakana":"ゲンキデスカ？","halfWidthKatakana":"ｹﾞﾝｷﾃﾞｽｶ？","romanji":"genki desu ka?"}
 
     Input: "${inputText}"
     `;
