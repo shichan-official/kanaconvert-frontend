@@ -14,6 +14,8 @@ export async function handler(event, context) {
   - "romanji": the input transliterated to Roman letters (Romaji)
   
   Always respond ONLY with a valid, compact JSON object. If conversion is not possible for a field, return an empty string for that field. Do not include any explanation.
+  If input is English only (or contains English), do your best to transliterate for each case.
+  For example if input is "Test", I expect {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｯﾄ","romanji":"tesuto"}
   
   Input: "${inputText}"
   `;
