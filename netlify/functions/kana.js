@@ -24,16 +24,13 @@ export async function handler(event, context) {
 
     Examples:
     Input: "Test"
-    Output: {"hiragana":"てすと","katakana":"テスト","halfWidthKatakana":"ﾃｽﾄ","romanji":"Test"}
+    Output: {"hiragana":"Test","katakana":"Test","halfWidthKatakana":"Test","romanji":"Test"}
 
     Input: "漢字ですTEST"
-    Output: {"hiragana":"かんじですTEST","katakana":"カンジデステスト","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽﾃｽﾄ","romanji":"kanji desu TEST"}
+    Output: {"hiragana":"かんじですTEST","katakana":"カンジデスTEST","halfWidthKatakana":"ｶﾝｼﾞﾃﾞｽTEST","romanji":"kanji desu TEST"}
 
     Input: "元気ですか？今木場駅なの？This is a test"
     Output: {"hiragana":"げんきですか？いまきばえきなの？This is a test","katakana":"ゲンキデスカ？イマキバエキナノ？This is a test","halfWidthKatakana":"ｹﾞﾝｷﾃﾞｽｶ?ｲﾏｷﾊﾞｴｷﾅﾉ?This is a test","romanji":"genki desu ka? ima kiba eki nano? This is a test"}
-
-    Input: "清香です"
-    Output: {"hiragana":"さやかです","katakana":"サヤカです","halfWidthKatakana":"ｻﾔｶです","romanji":"Sayaka desu"}
 
     Input: "${inputText}"
     `;
@@ -45,7 +42,7 @@ export async function handler(event, context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "microsoft/mai-ds-r1:free",
+          model: "shisa-ai/shisa-v2-llama3.3-70b:free",
           messages: [{ role: "user", content: prompt }]
         })
       });
