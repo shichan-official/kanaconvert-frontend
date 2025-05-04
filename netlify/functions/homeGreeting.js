@@ -1,4 +1,4 @@
-// netlify/functions/greeting.js
+// netlify/functions/homeGreeting.js
 
 export async function handler(event, context) {
     const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -12,8 +12,8 @@ export async function handler(event, context) {
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct",
         messages: [{
-            role: "user",
-            content: "Give a short, friendly one-sentence greeting (in English) for a kana conversion website (not a learning website). Do not include explanations or translations. Do not use any emojis. Do not use quotation marks around the response and keep it short."
+          role: "user",
+          content: "Give a short, friendly one-sentence greeting (in English) for a personal website that uses different large language models for various tools. Do not include explanations or translations. Do not use any emojis. Do not use quotation marks around the response and keep it short."
         }]
       })
     });
@@ -32,5 +32,4 @@ export async function handler(event, context) {
       statusCode: 200,
       body: JSON.stringify({ message })
     };
-}
-  
+}  
