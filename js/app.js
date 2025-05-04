@@ -2,7 +2,7 @@ const CACHE_KEY = 'homeGreetingMessage';
 const CACHE_TIMESTAMP_KEY = 'homeGreetingMessageTimestamp';
 const KANA_CACHE_KEY = 'kanaGreetingMessage';
 const KANA_CACHE_TIMESTAMP_KEY = 'kanaGreetingMessageTimestamp';
-const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_EXPIRATION_TIME = 10 * 1000; // 10 seconds
 
 function switchTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
