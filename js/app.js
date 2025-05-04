@@ -21,17 +21,22 @@ function switchTab(tabId) {
 
 async function performConversion() {
     const text = document.getElementById('inputText').value;
+    const spinner = document.getElementById('loadingSpinner');
+    const results = document.getElementById('results');
 
     if (!text.trim()) {
         alert('Please enter text to convert.');
         return;
     }
 
+    spinner.style.display = 'block';
+    results.style.display = 'none';
+
     try {
         const response = await fetch('/.netlify/functions/kana', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
         });
 
         if (!response.ok) throw new Error('Conversion failed');
@@ -41,9 +46,11 @@ async function performConversion() {
         document.getElementById('katakanaResult').textContent = data.katakana;
         document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
         document.getElementById('romanjiResult').textContent = data.romanji;
-        document.getElementById('results').style.display = 'block';
+        results.style.display = 'block';
     } catch (err) {
         alert('Error: ' + err.message);
+    } finally {
+        spinner.style.display = 'none';
     }
 }
 
