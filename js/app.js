@@ -13,11 +13,11 @@ function switchTab(tabId) {
   
     // Call greeting functions when specific tabs are selected
     if (tabId === 'homeTab') {
-      loadHomeGreeting();
+        loadHomeGreeting();
     } else if (tabId === 'kanaTab') {
-      loadKanaGreeting();
+        loadKanaGreeting();
     }
-  }
+}
 
 async function performConversion() {
     const text = document.getElementById('inputText').value;
