@@ -1,10 +1,17 @@
 function switchTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-
+  
     event.target.closest('button').classList.add('active');
     document.getElementById(tabId).classList.add('active');
-}
+  
+    // Call greeting functions when specific tabs are selected
+    if (tabId === 'homeTab') {
+      loadHomeGreeting();
+    } else if (tabId === 'kanaTab') {
+      loadKanaGreeting();
+    }
+  }
 
 async function performConversion() {
     const text = document.getElementById('inputText').value;
@@ -63,6 +70,18 @@ async function loadHomeGreeting() {
       }
     } catch (err) {
       el.textContent = "Welcome to my site!";
+    }
+}
+
+async function loadKanaGreeting() {
+    try {
+      const response = await fetch('/.netlify/functions/greeting');
+      if (!response.ok) throw new Error('Failed to load Kana greeting');
+      const data = await response.json();
+      const kanaTitle = document.querySelector('#kanaTab h1');
+      kanaTitle.textContent = data.message;
+    } catch (err) {
+      console.error(err);
     }
 }
 
