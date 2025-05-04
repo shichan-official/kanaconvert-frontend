@@ -23,6 +23,7 @@ async function performConversion() {
     const text = document.getElementById('inputText').value;
     const spinner = document.getElementById('loadingSpinner');
     const results = document.getElementById('results');
+    const convertBtn = document.getElementById('convertButton'); // Add ID in HTML if missing
 
     if (!text.trim()) {
         alert('Please enter text to convert.');
@@ -31,6 +32,7 @@ async function performConversion() {
 
     spinner.style.display = 'block';
     results.style.display = 'none';
+    convertBtn.disabled = true;
 
     try {
         const response = await fetch('/.netlify/functions/kana', {
@@ -51,6 +53,7 @@ async function performConversion() {
         alert('Error: ' + err.message);
     } finally {
         spinner.style.display = 'none';
+        convertBtn.disabled = false;
     }
 }
 
