@@ -1,3 +1,9 @@
+const CACHE_KEY = 'homeGreetingMessage';
+const CACHE_TIMESTAMP_KEY = 'homeGreetingMessageTimestamp';
+const KANA_CACHE_KEY = 'kanaGreetingMessage';
+const KANA_CACHE_TIMESTAMP_KEY = 'kanaGreetingMessageTimestamp';
+const CACHE_EXPIRATION_TIME = 60 * 60 * 1000; // 24 hours in milliseconds
+
 function switchTab(tabId) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -55,30 +61,56 @@ function copyToClipboard(id) {
 }
 
 async function loadHomeGreeting() {
-    const el = document.getElementById("homeGreeting");
+  const el = document.getElementById("homeGreeting");
   
+  const cachedMessage = localStorage.getItem(CACHE_KEY);
+  const cachedTimestamp = parseInt(localStorage.getItem(CACHE_TIMESTAMP_KEY), 10);
+
+  // If cached message exists and it's still within the expiration period
+  if (cachedMessage && (Date.now() - cachedTimestamp < CACHE_EXPIRATION_TIME)) {
+    typeWriterEffect(cachedMessage, el, 30);
+  } else {
     try {
       const res = await fetch("/.netlify/functions/homeGreeting");
       const data = await res.json();
       const message = data.message || "Welcome to my site!";
-      typeWriterEffect(message, el, 40);
+
+      // Cache the message and the timestamp
+      localStorage.setItem(CACHE_KEY, message);
+      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+
+      typeWriterEffect(message, el, 30);
     } catch (err) {
-        typeWriterEffect("Welcome to Shichan's site! Trying to get the best out of LLMs...", el, 40);
+      el.textContent = "Welcome to my site!";
     }
+  }
 }
 
 async function loadKanaGreeting() {
-        const el = document.getElementById("kanaGreeting");
-        try {
-            const response = await fetch("/.netlify/functions/greeting");
-            if (!response.ok) throw new Error("Failed to load Kana greeting");
+  const el = document.getElementById("kanaGreeting");
 
-            const data = await response.json();
-            const clean = data.message.replace(/^"(.*)"$/, '$1');
-            typeWriterEffect(clean, el, 40);
+  // Check if the message is cached in localStorage
+  const cachedMessage = localStorage.getItem(KANA_CACHE_KEY);
+  const cachedTimestamp = parseInt(localStorage.getItem(KANA_CACHE_TIMESTAMP_KEY), 10);
+
+  // If cached message exists and it's still within the expiration period
+  if (cachedMessage && (Date.now() - cachedTimestamp < CACHE_EXPIRATION_TIME)) {
+    typeWriterEffect(cachedMessage, el, 30);
+  } else {
+    try {
+      const res = await fetch("/.netlify/functions/kanaGreeting");
+      const data = await res.json();
+      const message = data.message || "Welcome to the Kana Converter!";
+
+      // Cache the message and the timestamp
+      localStorage.setItem(KANA_CACHE_KEY, message);
+      localStorage.setItem(KANA_CACHE_TIMESTAMP_KEY, Date.now().toString());
+
+      typeWriterEffect(message, el, 30);
     } catch (err) {
-        typeWriterEffect("Welcome to the Kana Converter.", el, 40);
+      el.textContent = "Welcome to the Kana Converter!";
     }
+  }
 }
 
 const translations = {
