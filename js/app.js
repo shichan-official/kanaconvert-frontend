@@ -61,27 +61,23 @@ async function loadHomeGreeting() {
       const res = await fetch("/.netlify/functions/homeGreeting");
       const data = await res.json();
       const message = data.message || "Welcome to my site!";
-  
-      // Optional: typing effect
-      el.textContent = "";
-      for (let i = 0; i < message.length; i++) {
-        el.textContent += message[i];
-        await new Promise(r => setTimeout(r, 30));
-      }
+      typeWriterEffect(message, el, 40);
     } catch (err) {
-      el.textContent = "Welcome to my site!";
+        typeWriterEffect("Welcome to Shichan's site! Trying to get the best out of LLMs...", el, 40);
     }
 }
 
 async function loadKanaGreeting() {
-    try {
-      const response = await fetch('/.netlify/functions/greeting');
-      if (!response.ok) throw new Error('Failed to load Kana greeting');
-      const data = await response.json();
-      const kanaTitle = document.querySelector('#kanaTab h1');
-      kanaTitle.textContent = data.message;
+        const el = document.getElementById("kanaGreeting");
+        try {
+            const response = await fetch("/.netlify/functions/greeting");
+            if (!response.ok) throw new Error("Failed to load Kana greeting");
+
+            const data = await response.json();
+            const clean = data.message.replace(/^"(.*)"$/, '$1');
+            typeWriterEffect(clean, el, 40);
     } catch (err) {
-      console.error(err);
+        typeWriterEffect("Welcome to the Kana Converter.", el, 40);
     }
 }
 
@@ -131,6 +127,19 @@ function setLanguage(lang) {
     // Update input placeholder dynamically
     document.getElementById('inputText').placeholder = 
         lang === 'ja' ? '日本語のテキストを入力してください' : 'Enter Japanese text here';
+}
+
+function typeWriterEffect(text, element, delay = 50) {
+    element.textContent = "";
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, delay);
+        }
+    }
+    type();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
