@@ -1,4 +1,4 @@
-// netlify/functions/greeting.js
+// netlify/functions/kanaGreeting.js
 
 export async function handler(event, context) {
     const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;

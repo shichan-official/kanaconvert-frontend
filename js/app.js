@@ -71,17 +71,17 @@ async function loadHomeGreeting() {
     typeWriterEffect(cachedMessage, el, 30);
   } else {
     try {
-      const res = await fetch("/.netlify/functions/homeGreeting");
-      const data = await res.json();
-      const message = data.message || "Welcome to my site!";
+        const res = await fetch("/.netlify/functions/homeGreeting");
+        const data = await res.json();
+        const message = data.message || "Welcome to my site!";
 
-      // Cache the message and the timestamp
-      localStorage.setItem(CACHE_KEY, message);
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+        // Cache the message and the timestamp
+        localStorage.setItem(CACHE_KEY, message);
+        localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
 
-      typeWriterEffect(message, el, 30);
+        typeWriterEffect(message, el, 30);
     } catch (err) {
-      el.textContent = "Welcome to my site!";
+        typeWriterEffect("Welcome to my site!", el, 30);
     }
   }
 }
@@ -98,17 +98,17 @@ async function loadKanaGreeting() {
     typeWriterEffect(cachedMessage, el, 30);
   } else {
     try {
-      const res = await fetch("/.netlify/functions/kanaGreeting");
-      const data = await res.json();
-      const message = data.message || "Welcome to the Kana Converter!";
+        const res = await fetch("/.netlify/functions/kanaGreeting");
+        const data = await res.json();
+        const message = data.message || "Welcome to the Kana Converter!";
 
-      // Cache the message and the timestamp
-      localStorage.setItem(KANA_CACHE_KEY, message);
-      localStorage.setItem(KANA_CACHE_TIMESTAMP_KEY, Date.now().toString());
+        // Cache the message and the timestamp
+        localStorage.setItem(KANA_CACHE_KEY, message);
+        localStorage.setItem(KANA_CACHE_TIMESTAMP_KEY, Date.now().toString());
 
-      typeWriterEffect(message, el, 30);
+        typeWriterEffect(message, el, 30);
     } catch (err) {
-      el.textContent = "Welcome to the Kana Converter!";
+        typeWriterEffect("Welcome to the Kana Converter!", el, 30);
     }
   }
 }
