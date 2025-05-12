@@ -1,0 +1,12 @@
+{
+    "name": "netlify-functions",
+    "version": "1.0.0",
+    "description": "Netlify serverless functions for my site",
+    "type": "module",
+    "main": "index.js",
+    "dependencies": {
+      "cheerio": "^1.0.0-rc.12",
+      "node-fetch": "^3.3.2"
+    }
+  }
+  

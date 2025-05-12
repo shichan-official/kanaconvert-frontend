@@ -31,10 +31,19 @@
             <div class="page">
                 <div class="container">
                     <h1 data-key="summaryTitle">Website Summarizer</h1>
-                    <p data-key="comingSoon">Coming soon...</p>
+                    <p data-key="chooseTab"></p>
+                    
+                    <div class="form-group">
+                        <label for="urlInput">Enter URL to summarize:</label>
+                        <input type="text" id="urlInput" placeholder="Enter URL here" />
+                    </div>
+                    
+                    <button onclick="summarizeWebsite()">Summarize</button>
+                    <div id="summaryLoading" class="spinner" style="display:none;"></div>
+                    <div id="summaryResult" style="display:none;"></div>
                 </div>
             </div>
-        </div>
+        </div>                  
 
         <div class="tab-content" id="kanaTab">
             <div class="page">

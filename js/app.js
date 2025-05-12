@@ -188,3 +188,38 @@ window.addEventListener("DOMContentLoaded", () => {
     setLanguage("en");
     loadHomeGreeting();
 });
+
+async function summarizeWebsite() {
+    const url = document.getElementById("urlInput").value.trim();
+    const resultEl = document.getElementById("summaryResult");
+    const loadingEl = document.getElementById("summaryLoading");
+
+    resultEl.style.display = "none";
+    resultEl.textContent = "";
+    loadingEl.style.display = "block";
+
+    if (!url || !/^https?:\/\/.+\..+/.test(url)) {
+        loadingEl.style.display = "none";
+        alert("Please enter a valid URL.");
+        return;
+    }
+
+    try {
+        const response = await fetch('/.netlify/functions/summarizeUrl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) throw new Error("Failed to summarize");
+
+        const data = await response.json();
+        resultEl.textContent = data.summary || "No summary available.";
+        resultEl.style.display = "block";
+    } catch (err) {
+        resultEl.textContent = "Error: " + err.message;
+        resultEl.style.display = "block";
+    } finally {
+        loadingEl.style.display = "none";
+    }
+}
