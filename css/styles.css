@@ -194,12 +194,18 @@ button:hover {
     to { transform: rotate(360deg); }
 }
 
+/* Initially hidden */
+.hidden {
+    display: none;
+  }
+  
+/* Visible summary box */
 .summary-output {
     margin-top: 1em;
-    text-align: right;
-    background-color: #f5f5f5; /* Light grey background */
+    text-align: left;
+    background-color: #f5f5f5;
     padding: 1em;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    white-space: pre-wrap; /* Allows line breaks if needed */
+    white-space: pre-wrap;
 }

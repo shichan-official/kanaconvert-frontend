@@ -215,7 +215,7 @@ async function summarizeWebsite() {
 
         const data = await response.json();
         resultEl.textContent = data.summary || "No summary available.";
-        resultEl.style.display = "block";
+        resultEl.classList.remove("hidden");
     } catch (err) {
         resultEl.textContent = "Error: " + err.message;
         resultEl.style.display = "block";
