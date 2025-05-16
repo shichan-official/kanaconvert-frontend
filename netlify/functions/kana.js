@@ -42,7 +42,7 @@ export async function handler(event, context) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "shisa-ai/shisa-v2-llama3.3-70b:free",
+          model: "mistralai/mistral-7b-instruct",
           messages: [{ role: "user", content: prompt }]
         })
       });
