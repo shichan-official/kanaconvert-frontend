@@ -194,13 +194,13 @@ button:hover {
     to { transform: rotate(360deg); }
 }
 
-/* Initially hidden */
+/* Hide by default */
 .hidden {
     display: none;
-  }
+}
   
-/* Visible summary box */
-.summary-output {
+/* Style the result box itself */
+#summaryResult {
     margin-top: 1em;
     text-align: left;
     background-color: #f5f5f5;

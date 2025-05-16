@@ -194,7 +194,7 @@ async function summarizeWebsite() {
     const resultEl = document.getElementById("summaryResult");
     const loadingEl = document.getElementById("summaryLoading");
 
-    resultEl.style.display = "none";
+    resultEl.classList.add("hidden");
     resultEl.textContent = "";
     loadingEl.style.display = "block";
 
@@ -214,8 +214,8 @@ async function summarizeWebsite() {
         if (!response.ok) throw new Error("Failed to summarize");
 
         const data = await response.json();
-        resultEl.textContent = data.summary || "No summary available.";
         resultEl.classList.remove("hidden");
+        resultEl.textContent = data.summary || "No summary available.";
     } catch (err) {
         resultEl.textContent = "Error: " + err.message;
         resultEl.style.display = "block";
