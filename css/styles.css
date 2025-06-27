@@ -209,3 +209,18 @@ button:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     white-space: pre-wrap;
 }
+
+/* Styles for map game iframe */
+.wide-container {
+  max-width: 95vw;
+  width: 100%;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wide-page {
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+}
