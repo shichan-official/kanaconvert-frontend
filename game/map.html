@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>World Map: Click to Reveal Countries</title>
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+			height: 100%;
+			background: #222;
+			font-family: Arial, sans-serif;
+			overscroll-behavior: contain;
+		}
+		#chartdiv {
+			width: 100%;
+			height: 100%;
+			position: relative;
+			touch-action: none;
+		}
+		.control-panel {
+			position: absolute;
+			right: 20px;
+			top: 20px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			z-index: 10;
+		}
+		.button-row {
+			display: flex;
+			gap: 10px;
+		}
+		.button {
+			padding: 10px;
+			background-color: #444;
+			color: white;
+			border: none;
+			border-radius: 6px;
+			font-size: 16px;
+			cursor: pointer;
+			opacity: 0.8;
+			min-width: 40px;
+			padding: 10px 16px;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.button:hover {
+			background-color: #666;
+		}
+		#resetBtn {
+			width: auto;
+			height: auto;
+			padding: 10px 16px;
+			font-size: 14px;
+		}
+		.button-center-wrapper {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			margin-top: 10px;
+		}
+		#freeModeControls {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		#answerFeedback {
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+			transition: opacity 0.2s ease;
+		}
+	</style>
+	<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+	<script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+	<script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+</head>
+<body>
+	<div id="chartdiv"></div>
+	<div class="control-panel">
+		<div class="button-row">
+			<button id="zoomInBtn" class="button">+</button>
+			<button id="zoomOutBtn" class="button">−</button>
+		</div>
+		<div id="freeModeControls">
+			<button id="resetBtn" class="button">Reset</button>
+			<button id="showAllBtn" class="button">Show All</button>
+		</div>
+		<button id="mainMenuBtn" class="button">Main Menu</button>
+	</div>
+	<div id="modeOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+		<div style="background: #fff; border-radius: 10px; padding: 20px; text-align: center; max-width: 300px; font-family: sans-serif;">
+			<h2>Choose Mode</h2>
+			<div class="button-center-wrapper">
+				<button onclick="startFreePlay()" class="button">Explore Mode</button>
+				<button onclick="showQuizSetup()" class="button">Quiz Mode</button>
+			</div>
+			<div id="quizSetup" style="margin-top: 20px; display: none;">
+				<h3>Quiz Mode</h3>
+				<div style="margin-top: 10px;">
+					<strong>Game Mode</strong><br>
+					<label><input type="radio" name="quizType" value="standard" checked> Standard</label>
+					<label style="margin-left: 10px;"><input type="radio" name="quizType" value="multiple"> Multiple Choice</label>
+				</div>
+				<label><input type="radio" name="players" value="1" checked> 1 Player</label>
+				<label style="margin-left: 10px;"><input type="radio" name="players" value="2"> 2 Players</label>
+				<div style="margin-top: 10px;">
+					<input id="player1Name" placeholder="Player 1 Name" style="width: 100%; margin-bottom: 5px;">
+					<input id="player2Name" placeholder="Player 2 Name" style="width: 100%;" disabled>
+				</div>
+				<div style="margin-top: 10px;">
+					<strong>Winning Score</strong><br>
+					<label><input type="radio" name="winScore" value="1" checked> 1</label>
+					<label><input type="radio" name="winScore" value="3"> 3</label>
+					<label><input type="radio" name="winScore" value="5"> 5</label>
+					<label><input type="radio" name="winScore" value="10"> 10</label>
+					<label><input type="radio" name="winScore" value="infinite"> ∞ Infinite</label>
+				</div>
+				<div style="margin-top: 10px;">
+					<label>
+						<input type="checkbox" id="penaltyCheckbox">
+						Lose 1 point for wrong answers
+					</label>
+				</div>
+				<div class="button-center-wrapper">
+					<button onclick="startQuizMode()" class="button" style="margin-top: 10px;">Start</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="quizPrompt" style="display: none; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 18px; z-index: 999; font-family: sans-serif;"></div>
+	<div id="multipleChoiceOptions" style="display: none; position: absolute; top: 55px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+	<div id="answerFeedback" style="display: none; position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 8px; font-size: 16px; z-index: 1000; font-family: sans-serif; box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: opacity 0.2s ease;"></div>
+	<div id="scoreBoard" style="position: absolute; bottom: 10px; right: 20px; background: rgba(255,255,255,0.1); color: white; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-family: sans-serif; z-index: 999;"></div>
+	<div id="winnerOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); color: white; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;">
+		<h1 style="font-size: 36px;" id="winnerText">🎉 Player X Wins! 🎉</h1>
+		<canvas id="fireworksCanvas" style="position: absolute; inset: 0; z-index: -1;"></canvas>
+		<button onclick="resetToMainMenu()" class="button" style="margin-top: 30px; font-size: 18px;">Back to Main Menu</button>
+	</div>
+	<div id="mainMenuConfirm" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1500; justify-content: center; align-items: center;">
+		<div style="background: white; padding: 20px 30px; border-radius: 10px; text-align: center; max-width: 300px;">
+			<p style="font-size: 16px;">Are you sure you want to return to the Main Menu? Progress will be lost.</p>
+			<div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+				<button class="button" onclick="confirmMainMenu()">Yes</button>
+				<button class="button" onclick="cancelMainMenu()">No</button>
+			</div>
+		</div>
+	</div>
+    <!--
+    <audio id="correctSound" src="correct.mp3" preload="auto"></audio>
+    <audio id="incorrectSound" src="incorrect.mp3" preload="auto"></audio>
+    <audio id="gameOver" src="gameover.mp3" preload="auto"></audio>
+    <audio id="start" src="start.mp3" preload="auto"></audio>
+    -->
+	<script>
+		let polygonSeries;
+		let labelSeries;
+		let activeCountries = new Set();
+		let countryLabels = new Map();
+		let chart;
+        let root;
+
+		function showQuizSetup() {
+			const quizSetup = document.getElementById('quizSetup');
+
+			// If already visible, hide it
+			if (quizSetup.style.display === 'block') {
+				quizSetup.style.display = 'none';
+				return;
+			}
+
+			// Otherwise, show and reset values
+			quizSetup.style.display = 'block';
+
+			// Reset values
+			document.querySelector('input[name="winScore"][value="1"]').checked = true;
+			document.querySelector('input[name="players"][value="1"]').checked = true;
+
+			const player2Input = document.getElementById("player2Name");
+			player2Input.disabled = true;
+			player2Input.style.opacity = "0.5";
+			player2Input.value = "";
+
+			document.getElementById("player1Name").value = "";
+			document.getElementById("penaltyCheckbox").checked = false;
+		}
+
+		function startFreePlay() {
+			document.getElementById('freeModeControls').style.display = 'flex';
+			document.getElementById('modeOverlay').style.display = 'none';
+			window.gameMode = 'free';
+		}
+
+		function startQuizMode() {
+			// Clear any previous highlight
+            //playSound('start');
+			if (window.currentHighlightedPolygon) {
+				window.currentHighlightedPolygon.set("fill", am5.color(0x999999));
+				window.currentHighlightedPolygon = null;
+			}
+			
+			document.getElementById("multipleChoiceOptions").style.display = "none";
+			window.currentChoices = null;
+			document.getElementById("answerFeedback").style.display = "none";
+
+			// Reset all map polygons
+			polygonSeries.mapPolygons.each(p => p.set("active", false));
+			activeCountries.clear();
+			countryLabels.forEach(item => {
+				const sprite = item.bullets?.[0]?.get("sprite");
+				if (sprite) sprite.set("visible", false);
+			});
+			
+			document.getElementById('freeModeControls').style.display = 'none';
+			const playerCount = document.querySelector('input[name="players"]:checked').value;
+			const player1 = document.getElementById('player1Name').value || 'Player 1';
+			const player2 = document.getElementById('player2Name').value || 'Player 2';
+			const winScoreRadio = document.querySelector('input[name="winScore"]:checked');
+			const winScoreValue = winScoreRadio.value;
+			window.quizWinningScore = winScoreValue === "infinite" ? null : parseInt(winScoreValue, 10);
+			window.quizLoseOnWrong = document.getElementById("penaltyCheckbox").checked;
+			window.isInfiniteMode = winScoreValue === "infinite";
+			
+			const quizTypeRadio = document.querySelector('input[name="quizType"]:checked');
+			window.quizModeType = quizTypeRadio.value;
+
+			window.gameMode = 'quiz';
+			window.quizPlayers = playerCount === '2' ? [player1, player2] : [player1];
+			window.quizScores = new Array(window.quizPlayers.length).fill(0);
+			window.currentPlayerIndex = 0;
+			window.answeredCountries = new Set();
+			document.getElementById('modeOverlay').style.display = 'none';
+			window.quizCountryPool = polygonSeries.mapPolygons._values.filter(p => {
+				const geo = p.dataItem?.dataContext?.geometry;
+				if (!geo) return false;
+
+				let bounds = am5map.getGeoBounds(geo);
+				let width = Math.abs(bounds.right - bounds.left);
+				let height = Math.abs(bounds.top - bounds.bottom);
+				let approxArea = width * height;
+				return approxArea >= 2;
+			}).map(p => p.dataItem.dataContext);
+			updateScoreBoard();
+			promptNextCountry();
+		}
+
+		function promptNextCountry() {
+			if (window.currentHighlightedPolygon) {
+				window.currentHighlightedPolygon.set("fill", am5.color(0x999999));
+			}
+			if (window.quizCountryPool.length === 0) {
+				document.getElementById('quizPrompt').textContent = 'Game over!';
+				
+				if (isInfiniteMode) {
+                    let maxScore = Math.max(...quizScores);
+                    let winners = quizPlayers.filter((_, i) => quizScores[i] === maxScore);
+                    let winText = winners.length === 1 ? `${winners[0]} Wins!` : `It's a tie!`;
+                    document.getElementById('winnerText').textContent = `🎉 ${winText} 🎉`;
+                    document.getElementById('winnerOverlay').style.display = 'flex';
+                    startFireworks();
+                }
+				
+				return;
+			}
+
+			let next;
+			do {
+				const index = Math.floor(Math.random() * window.quizCountryPool.length);
+				next = window.quizCountryPool[index];
+			} while (answeredCountries.has(next.id));
+
+			window.currentQuizCountry = { id: next.id, name: next.name };
+			
+			if (window.quizModeType === 'multiple') {
+				const polygon = polygonSeries.mapPolygons._values.find(p => p.dataItem?.dataContext?.id === window.currentQuizCountry.id);
+				if (polygon) {
+					polygon.set("fill", am5.color(0xFF0000)); // red highlight
+					window.currentHighlightedPolygon = polygon;
+				}
+
+				// Build 3 fake options + correct one
+				const allCountries = window.quizCountryPool.filter(c => c.id !== next.id);
+				const fakeOptions = allCountries.sort(() => 0.5 - Math.random()).slice(0, 3);
+				const choices = [...fakeOptions, next].sort(() => 0.5 - Math.random());
+
+				// Display options
+				showMultipleChoiceOptions(choices);
+				window.currentChoices = choices;
+			}
+
+			document.getElementById('quizPrompt').style.display = 'block';
+			document.getElementById('quizPrompt').textContent =
+                window.quizModeType === 'multiple'
+                    ? `${window.quizPlayers[window.currentPlayerIndex]}: Which country is highlighted?`
+                    : `${window.quizPlayers[window.currentPlayerIndex]}: Find ${next.name}`;
+		}
+
+		am5.ready(function () {
+            initializeMap();
+        });
+		
+		document.getElementById("resetBtn").addEventListener("click", () => {
+			chart.goHome();
+			polygonSeries.mapPolygons.each(polygon => polygon.set("active", false));
+			activeCountries.clear();
+			countryLabels.forEach(item => {
+				const sprite = item.bullets?.[0]?.get("sprite");
+				if (sprite) sprite.set("visible", false);
+			});
+		});
+
+		document.getElementById("zoomInBtn").addEventListener("click", () => chart.zoomIn());
+		
+		document.getElementById("zoomOutBtn").addEventListener("click", () => chart.zoomOut());
+		
+		document.getElementById("showAllBtn").addEventListener("click", () => {
+			polygonSeries.mapPolygons.each(polygon => {
+				const id = polygon.dataItem.dataContext.id;
+				const name = polygon.dataItem.dataContext.name;
+
+				if (!activeCountries.has(id)) {
+					polygon.set("active", true);
+					activeCountries.add(id);
+
+					const geo = polygon.geoCentroid();
+					if (id === "AQ") {
+						geo.latitude = -75;
+						geo.longitude -= 55;
+					} else if (id === "GL") {
+						geo.latitude = 75;
+					} else if (id === "CA") {
+						geo.longitude -= 15;
+					}
+					const labelData = {
+						geometry: { type: "Point", coordinates: [geo.longitude, geo.latitude] },
+						name: name,
+						id: id
+					};
+					const item = labelSeries.pushDataItem(labelData);
+					countryLabels.set(id, item);
+				} else {
+					// Just ensure label is visible if already pushed
+					const item = countryLabels.get(id);
+					if (item) {
+						const sprite = item.bullets?.[0]?.get("sprite");
+						if (sprite) sprite.set("visible", true);
+					}
+				}
+			});
+		});
+
+        function initializeMap() {
+            root = am5.Root.new("chartdiv");
+            root.setThemes([am5.Theme.new(root)]);
+
+            chart = root.container.children.push(
+                am5map.MapChart.new(root, {
+                    panX: "translateX",
+                    panY: "translateY",
+                    projection: am5map.geoMercator(),
+                    wheelY: "zoom",
+                    wheelX: "none",
+                    wheelSensitivity: 0.3,
+                    pinchZoom: true
+                })
+            );
+
+            polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow
+            }));
+
+            polygonSeries.mapPolygons.template.setAll({
+                interactive: true,
+                cursorOverStyle: "pointer",
+                fill: am5.color(0x999999),
+                stroke: am5.color(0x333333),
+                strokeWidth: 0.8
+            });
+
+            polygonSeries.mapPolygons.template.states.create("hover", {
+                fill: am5.color(0xffffff)
+            });
+            polygonSeries.mapPolygons.template.states.create("active", {
+                fill: am5.color(0xffcc00)
+            });
+
+            labelSeries = chart.series.push(am5map.MapPointSeries.new(root, {}));
+
+            labelSeries.bullets.push(function (root, series, dataItem) {
+                const name = dataItem.get("name") || "";
+                return am5.Bullet.new(root, {
+                    sprite: am5.Label.new(root, {
+                        text: name,
+                        fill: am5.color(0xFFFFFF),
+                        fontSize: 9,
+                        fontWeight: "500",
+                        centerX: am5.p50,
+                        centerY: am5.p50,
+                        shadowColor: am5.color(0x000000),
+                        shadowBlur: 2,
+                        shadowOffsetX: 1,
+                        shadowOffsetY: 1
+                    })
+                });
+            });
+
+            setupPolygonClickHandlers();
+        }
+
+        function setupPolygonClickHandlers() {
+            polygonSeries.events.on("datavalidated", () => {
+                polygonSeries.mapPolygons.each(polygon => {
+                    polygon.events.on("click", () => {
+                        const id = polygon.dataItem.dataContext.id;
+                        const name = polygon.dataItem.dataContext.name;
+
+                        if (window.quizModeType === 'multiple') {
+                            if (window.currentHighlightedPolygon === polygon) return;
+                            return;
+                        }
+
+                        if (window.gameMode === 'quiz') {
+                            if (answeredCountries.has(id)) return;
+                            const correct = id === window.currentQuizCountry.id;
+
+                            if (correct) {
+                                answeredCountries.add(id);
+                                quizScores[currentPlayerIndex]++;
+                                polygon.set("active", true);
+
+                                const geo = polygon.geoCentroid();
+                                if (id === "AQ") geo.latitude = -75, geo.longitude -= 55;
+                                else if (id === "GL") geo.latitude = 75;
+                                else if (id === "CA") geo.longitude -= 15;
+
+                                const labelData = {
+                                    geometry: { type: "Point", coordinates: [geo.longitude, geo.latitude] },
+                                    name: name,
+                                    id: id
+                                };
+                                const item = labelSeries.pushDataItem(labelData);
+                                countryLabels.set(id, item);
+                                showAnswerFeedback(true);
+                                updateScoreBoard();
+
+                                if (!isInfiniteMode && quizScores[currentPlayerIndex] >= quizWinningScore) {
+                                    //playSound('gameOver');
+                                    showWinner(quizPlayers[currentPlayerIndex]);
+                                    return;
+                                } else {
+                                    //playSound('correctSound');
+                                }
+                            } else {
+                                //playSound('incorrectSound');
+                                //showAnswerFeedback(false);
+                                polygon.set("active", false);
+                                if (window.quizLoseOnWrong) {
+                                    quizScores[currentPlayerIndex] = Math.max(0, quizScores[currentPlayerIndex] - 1);
+                                    updateScoreBoard();
+                                }
+                            }
+
+                            currentPlayerIndex = (currentPlayerIndex + 1) % quizPlayers.length;
+                            promptNextCountry();
+                        } else {
+                            const isActive = activeCountries.has(id);
+                            if (!isActive) {
+                                polygon.set("active", true);
+                                activeCountries.add(id);
+
+                                const geo = polygon.geoCentroid();
+                                if (id === "AQ") geo.latitude = -75, geo.longitude -= 55;
+                                else if (id === "GL") geo.latitude = 75;
+                                else if (id === "CA") geo.longitude -= 15;
+
+                                const labelData = {
+                                    geometry: { type: "Point", coordinates: [geo.longitude, geo.latitude] },
+                                    name: name,
+                                    id: id
+                                };
+                                const item = labelSeries.pushDataItem(labelData);
+                                countryLabels.set(id, item);
+                            } else {
+                                polygon.set("active", false);
+                                activeCountries.delete(id);
+                                const item = countryLabels.get(id);
+                                if (item) {
+                                    const sprite = item.bullets?.[0]?.get("sprite");
+                                    if (sprite) sprite.set("visible", false);
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+        }
+		
+		document.querySelectorAll('input[name="players"]').forEach(radio => {
+			radio.addEventListener('change', () => {
+				const isTwoPlayers = document.querySelector('input[name="players"]:checked').value === "2";
+				const player2Input = document.getElementById("player2Name");
+				player2Input.disabled = !isTwoPlayers;
+				player2Input.style.opacity = isTwoPlayers ? "1" : "0.5";
+			});
+		});
+
+		function showAnswerFeedback(isCorrect) {
+			const el = document.getElementById('answerFeedback');
+			el.textContent = isCorrect ? 'Correct!' : 'Wrong!';
+			el.style.backgroundColor = isCorrect ? '#4caf50' : '#f44336';
+			el.style.display = 'block';
+			setTimeout(() => {
+				el.style.display = 'none';
+			}, 1000);
+		}
+
+		function updateScoreBoard() {
+            const scoreEl = document.getElementById('scoreBoard');
+            scoreEl.innerHTML = window.quizPlayers.map((p, i) => `${p}: ${window.quizScores[i]}`).join(' | ');
+        }
+
+        function showWinner(name) {
+            document.getElementById('winnerText').textContent = `🎉 ${name} Wins! 🎉`;
+            document.getElementById('winnerOverlay').style.display = 'flex';
+            startFireworks();
+        }
+
+
+		function resetToMainMenu() {
+            // Hide overlays and game UI
+            document.getElementById('winnerOverlay').style.display = 'none';
+            document.getElementById('modeOverlay').style.display = 'flex';
+            document.getElementById('quizSetup').style.display = 'none';
+            document.getElementById('quizPrompt').style.display = 'none';
+            document.getElementById('scoreBoard').textContent = '';
+
+            // Reset quiz config inputs to defaults
+            document.querySelector('input[name="quizType"][value="standard"]').checked = true;
+            document.querySelector('input[name="players"][value="1"]').checked = true;
+            document.querySelector('input[name="winScore"][value="1"]').checked = true;
+            document.getElementById('penaltyCheckbox').checked = false;
+            document.getElementById('player1Name').value = '';
+            document.getElementById('player2Name').value = '';
+            document.getElementById('player2Name').disabled = true;
+            document.getElementById('player2Name').style.opacity = "0.5";
+
+            // Clear game state
+            quizScores = [];
+            currentPlayerIndex = 0;
+            answeredCountries = new Set();
+            activeCountries.clear();
+            window.currentHighlightedPolygon = null;
+            
+            // Clear quiz
+            window.quizModeType = null;
+            window.currentQuizCountry = null;
+            window.currentChoices = null;
+            window.quizPlayers = [];
+            window.quizScores = [];
+
+            // Stop fireworks and clear canvas
+            if (fireworksAnimationId) {
+                cancelAnimationFrame(fireworksAnimationId);
+                fireworksAnimationId = null;
+            }
+            if (fireworksIntervalId) {
+                clearInterval(fireworksIntervalId);
+                fireworksIntervalId = null;
+            }
+            const canvas = document.getElementById("fireworksCanvas");
+            canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+
+            // Reset map view
+            if (root) {
+                root.dispose();
+                root = null;
+            }
+            document.getElementById("chartdiv").innerHTML = "";
+            initializeMap();
+        }
+		let fireworksAnimationId = null;
+		let fireworksIntervalId = null;
+
+		function startFireworks() {
+			const canvas = document.getElementById("fireworksCanvas");
+			const ctx = canvas.getContext("2d");
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+
+			const particles = [];
+			const colors = ['#ff2d2d', '#2dff2d', '#2d2dff', '#ff2dff', '#ffff2d'];
+
+			function spawnBurst() {
+				const x = Math.random() * canvas.width;
+				const y = Math.random() * canvas.height / 2;
+
+				for (let i = 0; i < 40; i++) {
+					const angle = Math.random() * 2 * Math.PI;
+					const speed = Math.random() * 5 + 2;
+					particles.push({
+						x, y,
+						vx: Math.cos(angle) * speed,
+						vy: Math.sin(angle) * speed,
+						radius: 2 + Math.random() * 2,
+						color: colors[Math.floor(Math.random() * colors.length)],
+						life: 80
+					});
+				}
+			}
+
+			function animate() {
+				ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				particles.forEach(p => {
+					p.x += p.vx;
+					p.y += p.vy;
+					p.vy += 0.05; // gravity
+					p.life--;
+
+					if (p.life > 0) {
+						ctx.beginPath();
+						ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+						ctx.fillStyle = p.color;
+						ctx.fill();
+					}
+				});
+
+				// Remove dead particles
+				for (let i = particles.length - 1; i >= 0; i--) {
+					if (particles[i].life <= 0) {
+						particles.splice(i, 1);
+					}
+				}
+
+				fireworksAnimationId = requestAnimationFrame(animate);
+			}
+
+			// Start animation
+			spawnBurst();
+			animate();
+			fireworksIntervalId = setInterval(spawnBurst, 1000);
+		}
+		
+		// Show confirmation popup
+		document.getElementById('mainMenuBtn').addEventListener('click', () => {
+			document.getElementById('mainMenuConfirm').style.display = 'flex';
+		});
+
+		// User clicks "Yes"
+		function confirmMainMenu() {
+			document.getElementById('mainMenuConfirm').style.display = 'none';
+			resetToMainMenu();
+		}
+
+		// User clicks "No"
+		function cancelMainMenu() {
+			document.getElementById('mainMenuConfirm').style.display = 'none';
+		}
+		
+		function showMultipleChoiceOptions(choices) {
+			const container = document.getElementById("multipleChoiceOptions");
+			container.innerHTML = '';
+			choices.forEach(choice => {
+				const btn = document.createElement("button");
+				btn.className = "button";
+				btn.textContent = choice.name;
+				btn.onclick = () => handleMultipleChoiceAnswer(choice.id);
+				container.appendChild(btn);
+			});
+			container.style.display = 'flex';
+		}
+		
+		function handleMultipleChoiceAnswer(selectedId) {
+			const correctId = window.currentQuizCountry.id;
+			const correct = selectedId === correctId;
+			const polygon = window.currentHighlightedPolygon;
+
+			if (polygon) {
+				polygon.set("fill", correct ? am5.color(0x555555) : am5.color(0x999999));
+				if (correct) polygon.set("active", true);
+			}
+
+			document.getElementById("multipleChoiceOptions").style.display = 'none';
+
+			if (!answeredCountries.has(correctId)) {
+				if (correct) {
+					answeredCountries.add(correctId);
+					quizScores[currentPlayerIndex]++;
+					const geo = polygon.geoCentroid();
+					const labelData = {
+						geometry: { type: "Point", coordinates: [geo.longitude, geo.latitude] },
+						name: window.currentQuizCountry.name,
+						id: correctId
+					};
+					const item = labelSeries.pushDataItem(labelData);
+					countryLabels.set(correctId, item);
+					showAnswerFeedback(true);
+					updateScoreBoard();
+
+					if (!isInfiniteMode && quizScores[currentPlayerIndex] >= quizWinningScore) {
+                        //playSound('gameOver');
+						showWinner(quizPlayers[currentPlayerIndex]);
+						return;
+					} else {
+                        //playSound('correctSound');
+                    }
+				} else {
+                    //playSound('incorrectSound');
+					showAnswerFeedback(false);
+					if (window.quizLoseOnWrong) {
+						quizScores[currentPlayerIndex] = Math.max(0, quizScores[currentPlayerIndex] - 1);
+						updateScoreBoard();
+					}
+				}
+			}
+
+			window.currentPlayerIndex = (currentPlayerIndex + 1) % quizPlayers.length;
+			promptNextCountry();
+		}
+        function playSound(soundName) {
+            const sound = document.getElementById(soundName);
+            if (sound) {
+                sound.pause(); // stop if already playing
+                sound.currentTime = 0;
+                sound.playbackRate = 1.1; // 1.0 is normal speed; 1.5 = 50% faster
+                sound.play();
+            }
+        }
+	</script>    
+</body>
+</html>
