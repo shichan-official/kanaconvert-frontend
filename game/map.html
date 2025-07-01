@@ -511,7 +511,7 @@
                                 }
                             } else {
                                 //playSound('incorrectSound');
-                                //showAnswerFeedback(false);
+                                showAnswerFeedback(false);
                                 polygon.set("active", false);
                                 if (window.quizLoseOnWrong) {
                                     quizScores[currentPlayerIndex] = Math.max(0, quizScores[currentPlayerIndex] - 1);
