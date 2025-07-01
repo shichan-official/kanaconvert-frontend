@@ -305,23 +305,20 @@
 
 					const id = polygon.dataItem.dataContext.id;
 
-					// Increase delay on mobile to avoid iframe rendering issues
-					const delay = /Mobi|Android/i.test(navigator.userAgent) ? 300 : 0;
-
 					if (id === "AQ") {
-						setTimeout(() => {
-							chart.goHome(); // Reset zoom for Antarctica
-						}, delay);
+						chart.events.once("frameended", function () {
+							chart.goHome();
+						});
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
 						if (centroid) {
-							setTimeout(() => {
+							chart.events.once("frameended", function () {
 								chart.zoomToGeoPoint(
 									{ longitude: centroid.longitude, latitude: centroid.latitude },
 									3,
 									true // animate
 								);
-							}, delay);
+							});
 						}
 					}
 				}
