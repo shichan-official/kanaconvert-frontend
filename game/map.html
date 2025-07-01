@@ -306,19 +306,24 @@
 					const id = polygon.dataItem.dataContext.id;
 
 					if (id === "AQ") {
-						chart.events.once("frameended", function () {
+						// Delay slightly to ensure map is stable in iframe
+						setTimeout(() => {
 							chart.goHome();
-						});
+						}, 500);
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
 						if (centroid) {
-							chart.events.once("frameended", function () {
-								chart.zoomToGeoPoint(
-									{ longitude: centroid.longitude, latitude: centroid.latitude },
-									3,
-									true // animate
-								);
-							});
+							// Delay slightly to ensure chart layout is fully ready
+							setTimeout(() => {
+								// Check if chart is still valid
+								if (!chart.isDisposed()) {
+									chart.zoomToGeoPoint(
+										{ longitude: centroid.longitude, latitude: centroid.latitude },
+										3,
+										true
+									);
+								}
+							}, 500);
 						}
 					}
 				}
