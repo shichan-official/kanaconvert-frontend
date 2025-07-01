@@ -305,27 +305,32 @@
 
 					const id = polygon.dataItem.dataContext.id;
 
+					// Make sure the flag is initialized
+					if (typeof window.hasZoomedOnce === "undefined") {
+						window.hasZoomedOnce = false;
+					}
+
 					if (id === "AQ") {
-						// Delay slightly to ensure map is stable in iframe
-						setTimeout(() => {
-							chart.goHome();
-						}, 500);
+						if (window.hasZoomedOnce) {
+							setTimeout(() => {
+								chart.goHome();
+							}, 300);
+						}
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
-						if (centroid) {
-							// Delay slightly to ensure chart layout is fully ready
+						if (centroid && window.hasZoomedOnce) {
 							setTimeout(() => {
-								// Check if chart is still valid
-								if (!chart.isDisposed()) {
-									chart.zoomToGeoPoint(
-										{ longitude: centroid.longitude, latitude: centroid.latitude },
-										3,
-										true
-									);
-								}
-							}, 500);
+								chart.zoomToGeoPoint(
+									{ longitude: centroid.longitude, latitude: centroid.latitude },
+									3,
+									true
+								);
+							}, 300);
 						}
 					}
+
+					// After first question, allow zooming
+					window.hasZoomedOnce = true;
 				}
 
 				// Build 3 fake options + correct one
