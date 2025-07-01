@@ -91,9 +91,10 @@
 		}
 		@media (max-width: 600px) {
 			#multipleChoiceOptions {
+				position: absolute !important;
+				top: 100px !important;
 				flex-direction: column;
 				align-items: center;
-				top: 150px; /* increase this to move it below the question */
 				gap: 8px;
 			}
 		}
@@ -305,12 +306,20 @@
 					window.currentHighlightedPolygon = polygon;
 
 					const id = polygon.dataItem.dataContext.id;
-					if (id === "AQ") { // "AQ" is the standard ISO code for Antarctica
-						chart.goHome(); // Reset map zoom
+					if (id === "AQ") {
+						setTimeout(() => {
+							chart.goHome(); // Reset zoom safely
+						}, 0);
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
 						if (centroid) {
-							chart.zoomToGeoPoint({ longitude: centroid.longitude, latitude: centroid.latitude }, 3, true); // zoom to country
+							setTimeout(() => {
+								chart.zoomToGeoPoint(
+									{ longitude: centroid.longitude, latitude: centroid.latitude },
+									3,
+									true // animate
+								);
+							}, 0);
 						}
 					}
 				}
