@@ -136,6 +136,8 @@ const translations = {
         kanaTitle: "Kana Conversion",
         inputLabel: "Enter Kanji, Katakana, or Hiragana:",
         convert: "Convert",
+        enterSummarizeUrl: "Enter URL to summarize:",
+        summarize: "Summarize",
         hiragana: "Hiragana:",
         katakana: "Katakana:",
         halfWidth: "Half Width Katakana:",
@@ -154,6 +156,8 @@ const translations = {
         kanaTitle: "カナ変換",
         inputLabel: "漢字、カタカナ、またはひらがなを入力してください：",
         convert: "変換",
+        enterSummarizeUrl: "要約するURLを入力してください：",
+        summarize: "要約する",
         hiragana: "ひらがな：",
         katakana: "カタカナ：",
         halfWidth: "半角カタカナ：",
@@ -171,6 +175,9 @@ function setLanguage(lang) {
     // Update input placeholder dynamically
     document.getElementById('inputText').placeholder = 
         lang === 'ja' ? '日本語のテキストを入力してください' : 'Enter Japanese text here';
+    
+    document.getElementById('urlInput').placeholder = 
+        lang === 'ja' ? 'ここにURLを入力' : 'Enter URL here';
 }
 
 function typeWriterEffect(text, element, delay = 50) {

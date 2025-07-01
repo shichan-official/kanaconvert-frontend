@@ -34,11 +34,11 @@
                     <h1 data-key="summaryTitle">Website Summarizer</h1>
                     
                     <div class="form-group">
-                        <label for="urlInput">Enter URL to summarize:</label>
+                        <label for="urlInput" data-key="enterSummarizeUrl">Enter URL to summarize:</label>
                         <input type="text" id="urlInput" placeholder="Enter URL here" />
                     </div>
                     
-                    <button onclick="summarizeWebsite()">Summarize</button>
+                    <button onclick="summarizeWebsite()" data-key="summarize">Summarize</button>
                     <div id="summaryLoading" class="spinner" style="display:none;"></div>
                     <div id="summaryResult" class="hidden"></div>
                 </div>
