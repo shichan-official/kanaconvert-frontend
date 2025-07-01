@@ -305,31 +305,35 @@
 
 					const id = polygon.dataItem.dataContext.id;
 
-					// Make sure the flag is initialized
 					if (typeof window.hasZoomedOnce === "undefined") {
 						window.hasZoomedOnce = false;
 					}
 
 					if (id === "AQ") {
-						if (window.hasZoomedOnce) {
-							setTimeout(() => {
-								chart.goHome();
-							}, 300);
-						}
+						// Antarctica – no zoom, just reset view
+						setTimeout(() => {
+							chart.goHome();
+						}, 300);
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
-						if (centroid && window.hasZoomedOnce) {
-							setTimeout(() => {
-								chart.zoomToGeoPoint(
-									{ longitude: centroid.longitude, latitude: centroid.latitude },
-									3,
-									true
-								);
-							}, 300);
+						if (centroid) {
+							if (!window.hasZoomedOnce) {
+								// First time: zoom twice with short delay
+								setTimeout(() => {
+									chart.zoomToGeoPoint({ longitude: centroid.longitude, latitude: centroid.latitude }, 3, true);
+									setTimeout(() => {
+										chart.zoomToGeoPoint({ longitude: centroid.longitude, latitude: centroid.latitude }, 3, true);
+									}, 300);
+								}, 100);
+							} else {
+								// Normal zoom
+								setTimeout(() => {
+									chart.zoomToGeoPoint({ longitude: centroid.longitude, latitude: centroid.latitude }, 3, true);
+								}, 300);
+							}
 						}
 					}
 
-					// After first question, allow zooming
 					window.hasZoomedOnce = true;
 				}
 
