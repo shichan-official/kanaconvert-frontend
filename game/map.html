@@ -304,10 +304,14 @@
 					window.currentHighlightedPolygon = polygon;
 
 					const id = polygon.dataItem.dataContext.id;
+
+					// Increase delay on mobile to avoid iframe rendering issues
+					const delay = /Mobi|Android/i.test(navigator.userAgent) ? 300 : 0;
+
 					if (id === "AQ") {
 						setTimeout(() => {
-							chart.goHome(); // Reset zoom safely
-						}, 0);
+							chart.goHome(); // Reset zoom for Antarctica
+						}, delay);
 					} else {
 						const centroid = am5map.getGeoCentroid(polygon.dataItem.get("geometry"));
 						if (centroid) {
@@ -317,7 +321,7 @@
 									3,
 									true // animate
 								);
-							}, 0);
+							}, delay);
 						}
 					}
 				}
