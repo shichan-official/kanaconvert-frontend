@@ -55,6 +55,14 @@
                         <input type="text" id="inputText" placeholder="Enter Japanese text here" />
                     </div>
                     <button id="convertButton" onclick="performConversion()" data-key="convert">Convert</button>
+                    <div class="form-group conversion-method-group">
+                        <label for="conversionMethod" data-key="methodLabel">Conversion Method</label>
+                        <select id="conversionMethod">
+                            <option value="shisa-ai/shisa-v2-llama3.3-70b:free">LLM: Shisa</option>
+                            <option value="openrouter/cypher-alpha:free">LLM: Cypher</option>
+                            <option value="google/gemini-2.0-flash-exp:free">LLM: Gemini Flash</option>
+                        </select>
+                    </div>
                     <div id="loadingSpinner" class="spinner" style="display: none;"></div>
 
                     <div class="results" id="results" style="display:none;">

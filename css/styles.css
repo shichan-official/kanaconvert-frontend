@@ -224,3 +224,23 @@ button:hover {
   justify-content: center;
   align-items: center;
 }
+
+/* Styles for LLM selector */
+.conversion-method-group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 1em;
+}
+
+.conversion-method-group label {
+	margin-bottom: 0.5em;
+    margin-top: 0.5em;
+	font-weight: bold;
+}
+
+#conversionMethod {
+	padding: 0.4em;
+	min-width: 250px;
+	text-align: center;
+}

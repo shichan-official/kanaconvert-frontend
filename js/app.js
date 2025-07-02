@@ -20,41 +20,42 @@ function switchTab(tabId) {
 }
 
 async function performConversion() {
-    const text = document.getElementById('inputText').value;
-    const spinner = document.getElementById('loadingSpinner');
-    const results = document.getElementById('results');
-    const convertBtn = document.getElementById('convertButton'); // Add ID in HTML if missing
+	const text = document.getElementById('inputText').value;
+	const model = document.getElementById('conversionMethod').value;
+	const spinner = document.getElementById('loadingSpinner');
+	const results = document.getElementById('results');
+	const convertBtn = document.getElementById('convertButton');
 
-    if (!text.trim()) {
-        alert('Please enter text to convert.');
-        return;
-    }
+	if (!text.trim()) {
+		alert('Please enter text to convert.');
+		return;
+	}
 
-    spinner.style.display = 'block';
-    results.style.display = 'none';
-    convertBtn.disabled = true;
+	spinner.style.display = 'block';
+	results.style.display = 'none';
+	convertBtn.disabled = true;
 
-    try {
-        const response = await fetch('/.netlify/functions/kana', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text })
-        });
+	try {
+		const response = await fetch('/.netlify/functions/kana', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ text, model })
+		});
 
-        if (!response.ok) throw new Error('Conversion failed');
+		if (!response.ok) throw new Error('Conversion failed');
 
-        const data = await response.json();
-        document.getElementById('hiraganaResult').textContent = data.hiragana;
-        document.getElementById('katakanaResult').textContent = data.katakana;
-        document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
-        document.getElementById('romanjiResult').textContent = data.romanji;
-        results.style.display = 'block';
-    } catch (err) {
-        alert('Error: ' + err.message);
-    } finally {
-        spinner.style.display = 'none';
-        convertBtn.disabled = false;
-    }
+		const data = await response.json();
+		document.getElementById('hiraganaResult').textContent = data.hiragana;
+		document.getElementById('katakanaResult').textContent = data.katakana;
+		document.getElementById('halfWidthKatakanaResult').textContent = data.halfWidthKatakana;
+		document.getElementById('romanjiResult').textContent = data.romanji;
+		results.style.display = 'block';
+	} catch (err) {
+		alert('Error: ' + err.message);
+	} finally {
+		spinner.style.display = 'none';
+		convertBtn.disabled = false;
+	}
 }
 
 function copyToClipboard(id) {
