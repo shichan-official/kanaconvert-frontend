@@ -244,3 +244,11 @@ button:hover {
 	min-width: 250px;
 	text-align: center;
 }
+
+#llmDisclaimer {
+	text-align: center;
+	font-size: 0.75em;
+	color: #666;
+	margin-top: 8px;
+	font-style: italic;
+}

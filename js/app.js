@@ -143,7 +143,8 @@ const translations = {
         katakana: "Katakana:",
         halfWidth: "Half Width Katakana:",
         romanji: "Romanji:",
-        copy: "Copy"
+        copy: "Copy",
+        llmDisclaimer: "The listed models are free and may become unavailable without notice. If one does not work, please try another."
     },
     ja: {
         home: "ホーム",
@@ -163,7 +164,8 @@ const translations = {
         katakana: "カタカナ：",
         halfWidth: "半角カタカナ：",
         romanji: "ローマ字：",
-        copy: "コピー"
+        copy: "コピー",
+        llmDisclaimer: "表示されているモデルは無料ですが、予告なく利用できなくなる場合があります。動作しない場合は別のモデルをお試しください。"
     }
 };
 
