@@ -202,19 +202,25 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 async function summarizeWebsite() {
-    const url = document.getElementById("urlInput").value.trim();
-    const resultEl = document.getElementById("summaryResult");
-    const loadingEl = document.getElementById("summaryLoading");
+    const urlInput = document.getElementById("urlInput").value.trim();
+	const resultEl = document.getElementById("summaryResult");
+	const loadingEl = document.getElementById("summaryLoading");
 
-    resultEl.classList.add("hidden");
-    resultEl.textContent = "";
-    loadingEl.style.display = "block";
+	resultEl.classList.add("hidden");
+	resultEl.textContent = "";
+	loadingEl.style.display = "block";
 
-    if (!url || !/^https?:\/\/.+\..+/.test(url)) {
-        loadingEl.style.display = "none";
-        alert("Please enter a valid URL.");
-        return;
-    }
+	if (!urlInput || !/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(urlInput.replace(/^https?:\/\//, ''))) {
+		loadingEl.style.display = "none";
+		alert("Please enter a valid URL.");
+		return;
+	}
+
+	// Add https:// if missing
+	let url = urlInput;
+	if (!/^https?:\/\//i.test(url)) {
+		url = "https://" + url;
+	}
 
     try {
         const response = await fetch('/.netlify/functions/summarizeUrl', {
