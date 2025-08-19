@@ -10,7 +10,7 @@ export async function handler(event, context) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct",
+        model: "meta-llama/llama-3.2-3b-instruct:free",
         messages: [{
           role: "user",
           content: "Give a short, friendly one-sentence greeting (in English) for a personal website that uses different large language models for various tools. Do not include explanations or translations. Do not use any emojis. Do not use quotation marks around the response and keep it short."

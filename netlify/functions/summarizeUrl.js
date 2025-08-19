@@ -33,7 +33,7 @@ export async function handler(event) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct",
+        model: "meta-llama/llama-3.2-3b-instruct:free",
         messages: [{
           role: "user",
           content: `Summarize the following webpage content clearly. Remove all boilerplate like nav menus, URLs, footers, and unrelated text:\n\n${cleanedText}`
