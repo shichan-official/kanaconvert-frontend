@@ -1,42 +1,38 @@
 // netlify/functions/kana.js
-export async function handler(event, context) {
+export async function handler(event) {
 	if (event.httpMethod !== "POST") {
 		return { statusCode: 405, body: "Method Not Allowed" };
 	}
 
 	const apiKey = process.env.OPENAI_API_KEY;
 	if (!apiKey) {
-		return {
-			statusCode: 500,
-			body: JSON.stringify({ error: "Server misconfigured: OPENAI_API_KEY not set." })
-		};
+		return { statusCode: 500, body: JSON.stringify({ error: "OPENAI_API_KEY not set" }) };
 	}
 
 	try {
 		const body = JSON.parse(event.body || "{}");
-		const inputText = body.text || "";
-		// Allow optional override to other cheap OpenAI models; default to gpt-5-nano.
+		const inputText = String(body.text || "");
 		const allowed = new Set(["gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"]);
-		let model = typeof body.model === "string" && allowed.has(body.model) ? body.model : "gpt-5-nano";
+		const model = allowed.has(body.model) ? body.model : "gpt-5-nano";
 
-		// Safety: very long inputs drive cost; clamp a bit
-		const text = String(inputText).slice(0, 256);
+		// keep cost sane
+		const text = inputText.slice(0, 4000);
 
 		const prompt = `
 You are a Japanese text converter for a Kana conversion website. Given any input, return a JSON object with four keys:
 
 - "hiragana": the entire input converted to Hiragana (convert all Kanji and Katakana)
 - "katakana": the same as above, but converted to full-width Katakana
-- "halfWidthKatakana": same as "katakana" but converted to **half-width Katakana characters**
+- "halfWidthKatakana": same as "katakana" but converted to half-width Katakana characters
 - "romanji": the input transliterated to Romaji
 
 Strict rules:
-- Absolutely no Kanji characters are allowed in any of the fields — fully convert them. Convert everything, including polite expressions like お願いします, into full kana.
-- In "halfWidthKatakana", all Katakana (including dakuten like グ/ゾ and handakuten like パ) **must** use correct half-width forms (e.g., ｸﾞ, ｿﾞ, ﾊﾟ) with proper combining where applicable.
-- There is a one-to-one mapping from katakana to halfWidthKatakana (same number of characters where feasible).
-- ASCII letters (A–Z, a–z) should be returned as-is in all fields.
-- Do not add or remove symbols like 〜 or ・ unless present in the original input.
-- Return **only** raw, valid, compact JSON. No markdown, no code fences, no commentary.
+- Absolutely no Kanji in any fields—fully convert them.
+- In "halfWidthKatakana", use correct half-width forms, including dakuten/handakuten (e.g., ｸﾞ, ｿﾞ, ﾊﾟ).
+- Katakana and halfWidthKatakana should align character-by-character as much as feasible.
+- ASCII letters (A–Z, a–z) must be returned as-is.
+- Do not add/remove symbols like 〜 or ・ unless they exist in the input.
+- Return only raw, valid, compact JSON. No markdown, no code fences, no commentary.
 
 Input: "${text}"
 `.trim();
@@ -50,13 +46,13 @@ Input: "${text}"
 			body: JSON.stringify({
 				model,
 				input: prompt,
-				temperature: 0,               // deterministic
-				max_output_tokens: 300        // plenty for compact JSON
+				temperature: 0
 			})
 		});
 
 		if (!res.ok) {
-			const err = await res.text();
+			const errText = await res.text();
+			console.error("OpenAI 4xx/5xx:", errText);
 			return {
 				statusCode: res.status,
 				body: JSON.stringify({
@@ -64,32 +60,23 @@ Input: "${text}"
 					katakana: "",
 					halfWidthKatakana: "",
 					romanji: "",
-					error: `LLM request failed: ${err}`
+					error: `LLM request failed: ${errText}`
 				})
 			};
 		}
 
 		const data = await res.json();
 
-		// Extract plain text from Responses API
 		let content = "";
-		if (data.output_text) {
-			content = data.output_text;
-		} else if (Array.isArray(data.output)) {
+		if (data.output_text) content = data.output_text;
+		else if (Array.isArray(data.output))
 			content = data.output
 				.flatMap(o => Array.isArray(o.content) ? o.content : [])
 				.map(c => c.text ?? c.value ?? "")
 				.join("");
-		} else if (data.choices?.[0]?.message?.content) {
-			// Fallback if gateway returns chat-like shape
-			content = data.choices[0].message.content;
-		}
-		content = (content || "").trim();
+		else if (data.choices?.[0]?.message?.content) content = data.choices[0].message.content;
 
-		// Strip code fences if model added them
-		content = content.replace(/```(?:json)?\s*([\s\S]*?)\s*```/i, "$1").trim();
-
-		// If there’s extra text, try to isolate the first JSON object
+		content = (content || "").trim().replace(/```(?:json)?\s*([\s\S]*?)\s*```/i, "$1").trim();
 		if (!content.startsWith("{")) {
 			const m = content.match(/{[\s\S]*}/);
 			if (m) content = m[0];
@@ -98,7 +85,7 @@ Input: "${text}"
 		let parsed;
 		try {
 			parsed = JSON.parse(content);
-		} catch (e) {
+		} catch {
 			console.error("Failed to parse model output:", content);
 			return {
 				statusCode: 200,
@@ -121,8 +108,8 @@ Input: "${text}"
 				romanji: parsed.romanji || ""
 			})
 		};
-	} catch (err) {
-		console.error("Unexpected error:", err);
+	} catch (e) {
+		console.error(e);
 		return {
 			statusCode: 500,
 			body: JSON.stringify({
