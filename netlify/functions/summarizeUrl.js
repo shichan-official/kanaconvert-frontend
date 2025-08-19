@@ -1,62 +1,76 @@
-import fetch from 'node-fetch';
+// netlify/functions/summarize.js
 import * as cheerio from 'cheerio';
 
 export async function handler(event) {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+	if (event.httpMethod !== 'POST') {
+		return { statusCode: 405, body: 'Method Not Allowed' };
+	}
 
-  const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+	try {
+		const apiKey = process.env.OPENAI_API_KEY;
+		if (!apiKey) {
+			return { statusCode: 500, body: JSON.stringify({ error: 'Server misconfigured: OPENAI_API_KEY not set.' }) };
+		}
 
-  try {
-    const { url } = JSON.parse(event.body);
-    if (!url || !/^https?:\/\//.test(url)) {
-      return { statusCode: 400, body: JSON.stringify({ error: 'Invalid URL' }) };
-    }
+		const { url } = JSON.parse(event.body || '{}');
+		if (!url || !/^https?:\/\//i.test(url)) {
+			return { statusCode: 400, body: JSON.stringify({ error: 'Invalid URL' }) };
+		}
 
-    // Fetch the HTML content of the page
-    const pageRes = await fetch(url, { timeout: 10000 });
-    const html = await pageRes.text();
+		// Fetch page with a 10s timeout
+		const controller = new AbortController();
+		const timer = setTimeout(() => controller.abort(), 10000);
+		let html = '';
+		try {
+			const pageRes = await fetch(url, { redirect: 'follow', signal: controller.signal });
+			clearTimeout(timer);
+			html = await pageRes.text();
+		} catch {
+			clearTimeout(timer);
+			return { statusCode: 502, body: JSON.stringify({ error: 'Failed to fetch the page.' }) };
+		}
 
-    // Load and clean the HTML with Cheerio
-    const $ = cheerio.load(html);
-    $('script, style, nav, footer, header, noscript, aside, iframe').remove();
-    const text = $('body').text().replace(/\s+/g, ' ').trim();
+		// Clean with Cheerio
+		const $ = cheerio.load(html);
+		$('script, style, nav, footer, header, noscript, aside, iframe').remove();
+		const text = $('body').text().replace(/\s+/g, ' ').trim();
+		const cleanedText = text.slice(0, 5000); // keep prompt cheap
 
-    const cleanedText = text.slice(0, 8000); // Limit to 8k chars
+		const prompt = `Summarize the following webpage content clearly and briefly in English.
+- Ignore navigation, ads, boilerplate.
+- Output 4–6 concise bullet points.
 
-    // Call OpenRouter to summarize
-    const llmRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.2-3b-instruct:free",
-        messages: [{
-          role: "user",
-          content: `Summarize the following webpage content clearly. Remove all boilerplate like nav menus, URLs, footers, and unrelated text:\n\n${cleanedText}`
-        }]
-      })
-    });
+CONTENT:
+${cleanedText}`;
 
-    if (!llmRes.ok) {
-      return { statusCode: llmRes.status, body: JSON.stringify({ error: "LLM request failed." }) };
-    }
+		// OpenAI Responses API
+		const aiRes = await fetch('https://api.openai.com/v1/responses', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${apiKey}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				model: 'gpt-5-nano',
+				input: prompt,
+				temperature: 0.2
+			})
+		});
 
-    const llmData = await llmRes.json();
-    const summary = llmData.choices[0].message.content;
+		if (!aiRes.ok) {
+			const err = await aiRes.text();
+			return { statusCode: aiRes.status, body: err };
+		}
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ summary })
-    };
+		const data = await aiRes.json();
+		const summary =
+			data.output_text
+			|| (Array.isArray(data.output)
+				? data.output.flatMap(o => Array.isArray(o.content) ? o.content : []).map(c => c.text ?? c.value ?? '').join('')
+				: (data.choices?.[0]?.message?.content || ''));
 
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Failed to summarize URL." })
-    };
-  }
+		return { statusCode: 200, body: JSON.stringify({ summary: summary.trim() }) };
+	} catch {
+		return { statusCode: 500, body: JSON.stringify({ error: 'Failed to summarize URL.' }) };
+	}
 }

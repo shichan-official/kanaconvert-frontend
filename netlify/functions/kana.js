@@ -1,12 +1,28 @@
 // netlify/functions/kana.js
-
 export async function handler(event, context) {
-	const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-	const body = JSON.parse(event.body || "{}");
-	const inputText = body.text || "";
-	const model = body.model || "shisa-ai/shisa-v2-llama3.3-70b:free"; // fallback default
+	if (event.httpMethod !== "POST") {
+		return { statusCode: 405, body: "Method Not Allowed" };
+	}
 
-	const prompt = `
+	const apiKey = process.env.OPENAI_API_KEY;
+	if (!apiKey) {
+		return {
+			statusCode: 500,
+			body: JSON.stringify({ error: "Server misconfigured: OPENAI_API_KEY not set." })
+		};
+	}
+
+	try {
+		const body = JSON.parse(event.body || "{}");
+		const inputText = body.text || "";
+		// Allow optional override to other cheap OpenAI models; default to gpt-5-nano.
+		const allowed = new Set(["gpt-5-nano", "gpt-5-mini", "gpt-4o-mini"]);
+		let model = typeof body.model === "string" && allowed.has(body.model) ? body.model : "gpt-5-nano";
+
+		// Safety: very long inputs drive cost; clamp a bit
+		const text = String(inputText).slice(0, 256);
+
+		const prompt = `
 You are a Japanese text converter for a Kana conversion website. Given any input, return a JSON object with four keys:
 
 - "hiragana": the entire input converted to Hiragana (convert all Kanji and Katakana)
@@ -16,60 +32,73 @@ You are a Japanese text converter for a Kana conversion website. Given any input
 
 Strict rules:
 - Absolutely no Kanji characters are allowed in any of the fields — fully convert them. Convert everything, including polite expressions like お願いします, into full kana.
-- In "halfWidthKatakana", all Katakana (including those with dakuten like グ or ゾ, or handakuten like パ) **must be correctly converted to their half-width forms** like  ｸﾞ, ｿﾞ, ﾊﾟ.
-- There is a one-to-one mapping from katakana to halfWidthKatakana, so they must look nearly identical and have the same number of characters.
-- Do not guess or use approximate characters. Use correct phonetic mappings only.
-- Alphabetical characters (A-Z, a-z) should be returned as-is in all fields.
-- Do not return extra symbols like 〜 or ・ unless they were in the original input.
-- Return only raw valid compact JSON. No markdown, no code block, no explanation.
+- In "halfWidthKatakana", all Katakana (including dakuten like グ/ゾ and handakuten like パ) **must** use correct half-width forms (e.g., ｸﾞ, ｿﾞ, ﾊﾟ) with proper combining where applicable.
+- There is a one-to-one mapping from katakana to halfWidthKatakana (same number of characters where feasible).
+- ASCII letters (A–Z, a–z) should be returned as-is in all fields.
+- Do not add or remove symbols like 〜 or ・ unless present in the original input.
+- Return **only** raw, valid, compact JSON. No markdown, no code fences, no commentary.
 
-Input: "${inputText}"
-`;
+Input: "${text}"
+`.trim();
 
-	try {
-		const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+		const res = await fetch("https://api.openai.com/v1/responses", {
 			method: "POST",
 			headers: {
-				"Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+				"Authorization": `Bearer ${apiKey}`,
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({
 				model,
-				messages: [{ role: "user", content: prompt }]
+				input: prompt,
+				temperature: 0,               // deterministic
+				max_output_tokens: 300        // plenty for compact JSON
 			})
 		});
 
-		const data = await response.json();
-		console.log("OpenRouter raw response:", JSON.stringify(data, null, 2));
-
-		if (!response.ok || !data.choices?.[0]?.message?.content) {
+		if (!res.ok) {
+			const err = await res.text();
 			return {
-				statusCode: response.status || 500,
+				statusCode: res.status,
 				body: JSON.stringify({
 					hiragana: "",
 					katakana: "",
 					halfWidthKatakana: "",
 					romanji: "",
-					error: "LLM request failed or empty response"
+					error: `LLM request failed: ${err}`
 				})
 			};
 		}
 
-		let content = data.choices[0].message.content.trim();
-		content = content.replace(/```(?:json)?\s*([\s\S]*?)\s*```/, "$1").trim();
+		const data = await res.json();
 
+		// Extract plain text from Responses API
+		let content = "";
+		if (data.output_text) {
+			content = data.output_text;
+		} else if (Array.isArray(data.output)) {
+			content = data.output
+				.flatMap(o => Array.isArray(o.content) ? o.content : [])
+				.map(c => c.text ?? c.value ?? "")
+				.join("");
+		} else if (data.choices?.[0]?.message?.content) {
+			// Fallback if gateway returns chat-like shape
+			content = data.choices[0].message.content;
+		}
+		content = (content || "").trim();
+
+		// Strip code fences if model added them
+		content = content.replace(/```(?:json)?\s*([\s\S]*?)\s*```/i, "$1").trim();
+
+		// If there’s extra text, try to isolate the first JSON object
+		if (!content.startsWith("{")) {
+			const m = content.match(/{[\s\S]*}/);
+			if (m) content = m[0];
+		}
+
+		let parsed;
 		try {
-			const parsed = JSON.parse(content);
-			return {
-				statusCode: 200,
-				body: JSON.stringify({
-					hiragana: parsed.hiragana || "",
-					katakana: parsed.katakana || "",
-					halfWidthKatakana: parsed.halfWidthKatakana || "",
-					romanji: parsed.romanji || ""
-				})
-			};
-		} catch (err) {
+			parsed = JSON.parse(content);
+		} catch (e) {
 			console.error("Failed to parse model output:", content);
 			return {
 				statusCode: 200,
@@ -82,6 +111,16 @@ Input: "${inputText}"
 				})
 			};
 		}
+
+		return {
+			statusCode: 200,
+			body: JSON.stringify({
+				hiragana: parsed.hiragana || "",
+				katakana: parsed.katakana || "",
+				halfWidthKatakana: parsed.halfWidthKatakana || "",
+				romanji: parsed.romanji || ""
+			})
+		};
 	} catch (err) {
 		console.error("Unexpected error:", err);
 		return {
