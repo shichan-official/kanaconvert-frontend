@@ -45,8 +45,7 @@ Input: "${text}"
 			},
 			body: JSON.stringify({
 				model,
-				input: prompt,
-				temperature: 0
+				input: prompt
 			})
 		});
 

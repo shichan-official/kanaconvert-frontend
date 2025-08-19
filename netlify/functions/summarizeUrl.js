@@ -43,7 +43,7 @@ export async function handler(event) {
 		const $ = cheerio.load(html);
 		$("script, style, nav, footer, header, noscript, aside, iframe").remove();
 		const text = $("body").text().replace(/\s+/g, " ").trim();
-		const cleanedText = text.slice(0, 8000);
+		const cleanedText = text.slice(0, 1000);
 
 		const prompt = `Summarize the following webpage content clearly and briefly in English.
 - Ignore navigation, ads, boilerplate.
@@ -60,8 +60,7 @@ ${cleanedText}`;
 			},
 			body: JSON.stringify({
 				model: "gpt-5-nano",
-				input: prompt,
-				temperature: 0.2
+				input: prompt
 			})
 		});
 
