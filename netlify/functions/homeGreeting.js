@@ -1,6 +1,14 @@
 // netlify/functions/homeGreeting.js
 export async function handler(event, context) {
 	try {
+		if (!process.env.OPENAI_API_KEY) {
+			console.error("OPENAI_API_KEY missing at runtime");
+			return {
+				statusCode: 500,
+				body: JSON.stringify({ error: "Server misconfigured: OPENAI_API_KEY not set." })
+			};
+		}
+
 		const res = await fetch("https://api.openai.com/v1/responses", {
 			method: "POST",
 			headers: {
@@ -14,27 +22,21 @@ export async function handler(event, context) {
 		});
 
 		if (!res.ok) {
-			const errText = await res.text();
-			return { statusCode: res.status, body: errText };
+			const err = await res.text();
+			console.error("OpenAI error:", err);
+			return { statusCode: res.status, body: err };
 		}
 
 		const data = await res.json();
-
-		// Robust text extraction (Responses API)
-		let message = "";
-		if (data.output_text) {
-			message = data.output_text;
-		} else if (Array.isArray(data.output)) {
-			message = data.output
-				.flatMap(o => Array.isArray(o.content) ? o.content : [])
-				.map(c => c.text ?? c.value ?? "")
-				.join("");
-		} else if (data.choices?.[0]?.message?.content) {
-			message = data.choices[0].message.content; // fallback shape
-		}
+		const message =
+			data.output_text
+			|| (Array.isArray(data.output) ? data.output.flatMap(o => o.content ?? []).map(c => c.text ?? c.value ?? "").join("") : "")
+			|| data.choices?.[0]?.message?.content
+			|| "";
 
 		return { statusCode: 200, body: JSON.stringify({ message }) };
 	} catch (e) {
+		console.error(e);
 		return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
 	}
 }
